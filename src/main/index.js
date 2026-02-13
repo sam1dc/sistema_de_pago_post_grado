@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
-const excelReader = require('./src/modules/excelReader');
-const excelWriter = require('./src/modules/excelWriter');
+const excelReader = require('./modules/excelReader');
+const excelWriter = require('./modules/excelWriter');
 
 let mainWindow;
 
@@ -16,7 +16,7 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
 }
 
 app.whenReady().then(createWindow);
