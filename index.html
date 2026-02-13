@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Consulta de Pagos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { color: #333; margin-bottom: 30px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; }
+    .tab { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 16px; color: #666; border-bottom: 3px solid transparent; }
+    .tab.active { color: #007bff; border-bottom-color: #007bff; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-right: 10px; }
+    button:hover { background: #0056b3; }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #545b62; }
+    .directory-info { padding: 10px; background: #e9ecef; border-radius: 4px; margin-top: 10px; font-size: 13px; }
+    .results { margin-top: 30px; }
+    .summary { background: #f8f9fa; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
+    .summary-item { margin-bottom: 10px; }
+    .summary-item strong { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #007bff; color: white; }
+    tr:hover { background: #f8f9fa; }
+    .error { color: #dc3545; padding: 10px; background: #f8d7da; border-radius: 4px; margin-top: 10px; }
+    .success { color: #155724; padding: 10px; background: #d4edda; border-radius: 4px; margin-top: 10px; }
+    .no-results { color: #856404; padding: 10px; background: #fff3cd; border-radius: 4px; margin-top: 10px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .new-file-option { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sistema de Consulta de Pagos de Alumnos</h1>
+    
+    <div class="form-group">
+      <button id="selectDir">Seleccionar Directorio de Archivos Excel</button>
+      <div id="dirInfo" class="directory-info" style="display:none;"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="search">Consultar Pagos</button>
+      <button class="tab" data-tab="add">Agregar Pago</button>
+    </div>
+
+    <!-- Tab: Consultar Pagos -->
+    <div id="search-tab" class="tab-content active">
+      <div class="form-group">
+        <label for="cedula">Cédula del Alumno:</label>
+        <input type="text" id="cedula" placeholder="Ingrese la cédula">
+      </div>
+      <button id="searchBtn">Buscar</button>
+      <div id="results" class="results"></div>
+    </div>
+
+    <!-- Tab: Agregar Pago -->
+    <div id="add-tab" class="tab-content">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="addCedula">Cédula:</label>
+          <input type="text" id="addCedula" placeholder="Cédula del alumno">
+        </div>
+        <div class="form-group">
+          <label for="addNombre">Nombre:</label>
+          <input type="text" id="addNombre" placeholder="Nombre">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="addApellido">Apellido:</label>
+          <input type="text" id="addApellido" placeholder="Apellido">
+        </div>
+        <div class="form-group">
+          <label for="addCarrera">Carrera:</label>
+          <input type="text" id="addCarrera" placeholder="Carrera">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="addFecha">Fecha:</label>
+          <input type="date" id="addFecha">
+        </div>
+        <div class="form-group">
+          <label for="addReferencia">Nro. Referencia:</label>
+          <input type="text" id="addReferencia" placeholder="Número de referencia">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="addTotalPagar">Total a Pagar:</label>
+          <input type="number" id="addTotalPagar" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label for="addPago">Pago:</label>
+          <input type="number" id="addPago" placeholder="0.00" step="0.01">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="addDebe">Cuánto Debe:</label>
+        <input type="number" id="addDebe" placeholder="0.00" step="0.01" readonly style="background: #e9ecef;">
+      </div>
+
+      <div class="form-group">
+        <label for="addSemestre">Semestre:</label>
+        <input type="text" id="addSemestre" placeholder="Ej: 2026-1">
+      </div>
+
+      <div class="form-group">
+        <label for="fileSelect">Archivo Excel:</label>
+        <select id="fileSelect">
+          <option value="">Seleccione un archivo</option>
+        </select>
+        <div class="new-file-option">
+          <label>
+            <input type="checkbox" id="createNewFile"> Crear nuevo archivo
+          </label>
+          <input type="text" id="newFileName" placeholder="Nombre del archivo (ej: pagos_2026-1.xlsx)" style="margin-top: 10px; display: none;">
+        </div>
+      </div>
+
+      <button id="addPaymentBtn">Agregar Pago</button>
+      <div id="addResults" class="results"></div>
+    </div>
+  </div>
+
+  <script>
+    let selectedDirectory = null;
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+      });
+    });
+
+    // Seleccionar directorio
+    document.getElementById('selectDir').addEventListener('click', async () => {
+      const dir = await window.electronAPI.selectDirectory();
+      if (dir) {
+        selectedDirectory = dir;
+        document.getElementById('dirInfo').style.display = 'block';
+        document.getElementById('dirInfo').textContent = `Directorio seleccionado: ${dir}`;
+        await loadExcelFiles();
+      }
+    });
+
+    // Cargar archivos Excel
+    async function loadExcelFiles() {
+      if (!selectedDirectory) return;
+      try {
+        const files = await window.electronAPI.getExcelFiles(selectedDirectory);
+        const select = document.getElementById('fileSelect');
+        select.innerHTML = '<option value="">Seleccione un archivo</option>';
+        files.forEach(file => {
+          const option = document.createElement('option');
+          option.value = file;
+          option.textContent = file;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error al cargar archivos:', error);
+      }
+    }
+
+    // Toggle crear nuevo archivo
+    document.getElementById('createNewFile').addEventListener('change', (e) => {
+      const newFileInput = document.getElementById('newFileName');
+      const fileSelect = document.getElementById('fileSelect');
+      if (e.target.checked) {
+        newFileInput.style.display = 'block';
+        fileSelect.disabled = true;
+      } else {
+        newFileInput.style.display = 'none';
+        fileSelect.disabled = false;
+      }
+    });
+
+    // Calcular cuánto debe automáticamente
+    function calculateDebt() {
+      const totalPagar = parseFloat(document.getElementById('addTotalPagar').value) || 0;
+      const pago = parseFloat(document.getElementById('addPago').value) || 0;
+      const debe = totalPagar - pago;
+      document.getElementById('addDebe').value = debe >= 0 ? debe.toFixed(2) : 0;
+    }
+
+    document.getElementById('addTotalPagar').addEventListener('input', calculateDebt);
+    document.getElementById('addPago').addEventListener('input', calculateDebt);
+
+    // Buscar alumno
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+      const cedula = document.getElementById('cedula').value.trim();
+      const resultsDiv = document.getElementById('results');
+
+      if (!selectedDirectory) {
+        resultsDiv.innerHTML = '<div class="error">Por favor, seleccione un directorio primero.</div>';
+        return;
+      }
+
+      if (!cedula) {
+        resultsDiv.innerHTML = '<div class="error">Por favor, ingrese una cédula.</div>';
+        return;
+      }
+
+      try {
+        const data = await window.electronAPI.searchStudent(selectedDirectory, cedula);
+
+        if (!data) {
+          resultsDiv.innerHTML = '<div class="no-results">No se encontraron registros para esta cédula.</div>';
+          return;
+        }
+
+        const { student, payments, totalDebt, semesters } = data;
+
+        let html = `
+          <div class="summary">
+            <h2>Información del Alumno</h2>
+            <div class="summary-item"><strong>Nombre:</strong> ${student.nombre} ${student.apellido}</div>
+            <div class="summary-item"><strong>Cédula:</strong> ${student.cedula}</div>
+            <div class="summary-item"><strong>Carrera:</strong> ${student.carrera}</div>
+            <div class="summary-item"><strong>Deuda Total:</strong> $${totalDebt.toFixed(2)}</div>
+            <div class="summary-item"><strong>Semestres con Pagos:</strong> ${semesters}</div>
+          </div>
+
+          <h3>Historial de Pagos</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Semestre</th>
+                <th>Nro. Referencia</th>
+                <th>Total a Pagar</th>
+                <th>Pago</th>
+                <th>Debe</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${payments.map(p => `
+                <tr>
+                  <td>${p.fecha || 'N/A'}</td>
+                  <td>${p.semestre}</td>
+                  <td>${p.nro_referencia_del_pago || 'N/A'}</td>
+                  <td>$${(p.total_a_pagar || 0).toFixed(2)}</td>
+                  <td>$${(p.pago || 0).toFixed(2)}</td>
+                  <td>$${(p.cuanto_debe || 0).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+
+        resultsDiv.innerHTML = html;
+      } catch (error) {
+        resultsDiv.innerHTML = `<div class="error">${error.message}</div>`;
+      }
+    });
+
+    // Agregar pago
+    document.getElementById('addPaymentBtn').addEventListener('click', async () => {
+      const resultsDiv = document.getElementById('addResults');
+
+      if (!selectedDirectory) {
+        resultsDiv.innerHTML = '<div class="error">Por favor, seleccione un directorio primero.</div>';
+        return;
+      }
+
+      const createNew = document.getElementById('createNewFile').checked;
+      let fileName;
+
+      if (createNew) {
+        fileName = document.getElementById('newFileName').value.trim();
+        if (!fileName) {
+          resultsDiv.innerHTML = '<div class="error">Por favor, ingrese el nombre del archivo.</div>';
+          return;
+        }
+        if (!fileName.endsWith('.xlsx')) fileName += '.xlsx';
+      } else {
+        fileName = document.getElementById('fileSelect').value;
+        if (!fileName) {
+          resultsDiv.innerHTML = '<div class="error">Por favor, seleccione un archivo.</div>';
+          return;
+        }
+      }
+
+      const paymentData = {
+        cedula: document.getElementById('addCedula').value.trim(),
+        nombre: document.getElementById('addNombre').value.trim(),
+        apellido: document.getElementById('addApellido').value.trim(),
+        carrera: document.getElementById('addCarrera').value.trim(),
+        fecha: document.getElementById('addFecha').value,
+        nro_referencia_del_pago: document.getElementById('addReferencia').value.trim(),
+        pago: parseFloat(document.getElementById('addPago').value) || 0,
+        total_a_pagar: parseFloat(document.getElementById('addTotalPagar').value) || 0,
+        cuanto_debe: parseFloat(document.getElementById('addDebe').value) || 0,
+        semestre: document.getElementById('addSemestre').value.trim()
+      };
+
+      if (!paymentData.cedula || !paymentData.nombre || !paymentData.apellido) {
+        resultsDiv.innerHTML = '<div class="error">Por favor, complete los campos obligatorios (Cédula, Nombre, Apellido).</div>';
+        return;
+      }
+
+      try {
+        await window.electronAPI.addPayment(selectedDirectory, fileName, paymentData);
+        resultsDiv.innerHTML = '<div class="success">¡Pago agregado exitosamente!</div>';
+        
+        // Limpiar formulario
+        document.getElementById('addCedula').value = '';
+        document.getElementById('addNombre').value = '';
+        document.getElementById('addApellido').value = '';
+        document.getElementById('addCarrera').value = '';
+        document.getElementById('addFecha').value = '';
+        document.getElementById('addReferencia').value = '';
+        document.getElementById('addPago').value = '';
+        document.getElementById('addTotalPagar').value = '';
+        document.getElementById('addDebe').value = '';
+        document.getElementById('addSemestre').value = '';
+        
+        if (createNew) {
+          document.getElementById('newFileName').value = '';
+          document.getElementById('createNewFile').checked = false;
+          document.getElementById('newFileName').style.display = 'none';
+          document.getElementById('fileSelect').disabled = false;
+        }
+        
+        await loadExcelFiles();
+      } catch (error) {
+        resultsDiv.innerHTML = `<div class="error">${error.message}</div>`;
+      }
+    });
+
+    document.getElementById('cedula').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('searchBtn').click();
+    });
+  </script>
+</body>
+</html>
