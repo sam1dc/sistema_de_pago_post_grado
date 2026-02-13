@@ -1,0 +1,183 @@
+<div class="card">
+  <div class="card-content">
+    <h2 class="title is-5 mb-4">
+      <span class="icon-text">
+        <span class="icon has-text-primary">
+          <i class="mdi mdi-plus-circle"></i>
+        </span>
+        <span>Agregar Nuevo Pago</span>
+      </span>
+    </h2>
+
+    <div class="field">
+      <label class="label">Cédula del Alumno</label>
+      <div class="field has-addons">
+        <div class="control is-expanded has-icons-left">
+          <input class="input" type="text" id="searchCedula" placeholder="Ingrese la cédula para buscar">
+          <span class="icon is-left">
+            <i class="mdi mdi-card-account-details"></i>
+          </span>
+        </div>
+        <div class="control">
+          <button class="button is-primary" id="searchStudentBtn">
+            <span class="icon">
+              <i class="mdi mdi-magnify"></i>
+            </span>
+            <span>Buscar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="addResults"></div>
+
+    <div id="studentForm" class="hidden" style="display: none;">
+      <hr class="my-5">
+      
+      <h3 class="subtitle is-6 mb-4">Información del Estudiante</h3>
+      
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Cédula</label>
+            <div class="control">
+              <input class="input" type="text" id="addCedula" readonly>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Nombre</label>
+            <div class="control">
+              <input class="input" type="text" id="addNombre" placeholder="Nombre">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Apellido</label>
+            <div class="control">
+              <input class="input" type="text" id="addApellido" placeholder="Apellido">
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Carrera</label>
+            <div class="control">
+              <input class="input" type="text" id="addCarrera" placeholder="Carrera">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="subtitle is-6 mb-4 mt-5">Detalles del Pago</h3>
+
+      <div class="field">
+        <label class="label">Semestre</label>
+        <div class="control">
+          <input class="input" type="text" id="addSemestre" placeholder="Ej: 2026-1">
+        </div>
+      </div>
+
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Fecha</label>
+            <div class="control">
+              <input class="input" type="date" id="addFecha">
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Nro. Referencia</label>
+            <div class="control">
+              <input class="input" type="text" id="addReferencia" placeholder="Número de referencia">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Total a Pagar</label>
+            <div class="control has-icons-left">
+              <input class="input" type="number" id="addTotalPagar" placeholder="0.00" step="0.01">
+              <span class="icon is-left">
+                <i class="mdi mdi-currency-usd"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Pago</label>
+            <div class="control has-icons-left">
+              <input class="input" type="number" id="addPago" placeholder="0.00" step="0.01">
+              <span class="icon is-left">
+                <i class="mdi mdi-currency-usd"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Cuánto Debe</label>
+        <div class="control has-icons-left">
+          <input class="input" type="number" id="addDebe" placeholder="0.00" step="0.01" readonly>
+          <span class="icon is-left">
+            <i class="mdi mdi-currency-usd"></i>
+          </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Archivo Excel</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select id="fileSelect">
+              <option value="">Seleccione un archivo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="box mt-3">
+        <label class="checkbox">
+          <input type="checkbox" id="createNewFile">
+          Crear nuevo archivo
+        </label>
+        <div class="field mt-3 hidden" id="newFileField">
+          <div class="control">
+            <input class="input" type="text" id="newFileName" placeholder="Nombre del archivo (ej: pagos_2026-1.xlsx)">
+          </div>
+        </div>
+      </div>
+
+      <div class="field is-grouped mt-5">
+        <div class="control">
+          <button class="button is-primary" id="addPaymentBtn">
+            <span class="icon">
+              <i class="mdi mdi-content-save"></i>
+            </span>
+            <span>Agregar Pago</span>
+          </button>
+        </div>
+        <div class="control">
+          <button class="button is-light" id="cancelBtn">
+            <span class="icon">
+              <i class="mdi mdi-close"></i>
+            </span>
+            <span>Cancelar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

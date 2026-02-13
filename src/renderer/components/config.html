@@ -1,0 +1,67 @@
+<div class="card">
+  <div class="card-content">
+    <h2 class="title is-5 mb-4">
+      <span class="icon-text">
+        <span class="icon has-text-primary">
+          <i class="mdi mdi-cog"></i>
+        </span>
+        <span>Configuración</span>
+      </span>
+    </h2>
+
+    <div class="box">
+      <h3 class="subtitle is-6 mb-3">Directorio de Archivos Excel</h3>
+      <p class="mb-3 has-text-grey">Directorio actual:</p>
+      <div class="notification directory-banner mb-4">
+        <span class="icon-text">
+          <span class="icon has-text-primary">
+            <i class="mdi mdi-folder"></i>
+          </span>
+          <span id="currentDirPath"></span>
+        </span>
+      </div>
+      <button class="button is-primary" id="changeDirBtn">
+        <span class="icon">
+          <i class="mdi mdi-folder-open"></i>
+        </span>
+        <span>Cambiar Directorio</span>
+      </button>
+    </div>
+
+    <div class="box">
+      <h3 class="subtitle is-6 mb-3">
+        <span class="icon-text">
+          <span class="icon has-text-primary">
+            <i class="mdi mdi-currency-usd"></i>
+          </span>
+          <span>Costo por Semestre</span>
+        </span>
+      </h3>
+      <p class="mb-3 has-text-grey-dark">Define el costo estándar de un semestre. Se usará automáticamente al agregar pagos.</p>
+      
+      <div class="field has-addons">
+        <div class="control">
+          <a class="button is-static">$</a>
+        </div>
+        <div class="control is-expanded">
+          <input class="input" type="number" id="semesterCost" placeholder="5000.00" step="0.01">
+        </div>
+        <div class="control">
+          <button class="button is-primary" id="saveCostBtn">
+            <span class="icon">
+              <i class="mdi mdi-content-save"></i>
+            </span>
+            <span>Guardar</span>
+          </button>
+        </div>
+      </div>
+      
+      <div id="costResult" class="mt-3"></div>
+    </div>
+
+    <div class="box">
+      <h3 class="subtitle is-6 mb-3">Archivos Excel Encontrados</h3>
+      <div id="filesList" class="content"></div>
+    </div>
+  </div>
+</div>
