@@ -70,6 +70,8 @@
         <button id="searchStudentBtn" style="margin-top: 10px;">Buscar Alumno</button>
       </div>
 
+      <div id="addResults" class="results"></div>
+
       <div id="studentForm" style="display:none;">
         <div class="form-row">
           <div class="form-group">
@@ -140,7 +142,6 @@
 
         <button id="addPaymentBtn">Agregar Pago</button>
         <button class="secondary" id="cancelBtn">Cancelar</button>
-        <div id="addResults" class="results"></div>
       </div>
     </div>
   </div>
@@ -230,11 +231,10 @@
       try {
         const data = await window.electronAPI.searchStudent(selectedDirectory, cedula);
         
-        document.getElementById('studentForm').style.display = 'block';
-        document.getElementById('addCedula').value = cedula;
-
         if (data) {
           // Estudiante encontrado - autocompletar
+          document.getElementById('studentForm').style.display = 'block';
+          document.getElementById('addCedula').value = cedula;
           document.getElementById('addNombre').value = data.student.nombre;
           document.getElementById('addApellido').value = data.student.apellido;
           document.getElementById('addCarrera').value = data.student.carrera;
@@ -252,26 +252,42 @@
           
           addResults.innerHTML = '<div class="success">Estudiante encontrado. Datos autocompletados.</div>';
         } else {
-          // Estudiante no encontrado - permitir ingreso manual
-          document.getElementById('addNombre').value = '';
-          document.getElementById('addApellido').value = '';
-          document.getElementById('addCarrera').value = '';
-          document.getElementById('addSemestre').value = '';
-          
-          document.getElementById('addNombre').readOnly = false;
-          document.getElementById('addApellido').readOnly = false;
-          document.getElementById('addCarrera').readOnly = false;
-          document.getElementById('addSemestre').readOnly = false;
-          
-          document.getElementById('addNombre').style.background = 'white';
-          document.getElementById('addApellido').style.background = 'white';
-          document.getElementById('addCarrera').style.background = 'white';
-          document.getElementById('addSemestre').style.background = 'white';
-          
-          addResults.innerHTML = '<div class="no-results">Estudiante no encontrado. Ingrese los datos manualmente.</div>';
+          // Estudiante no encontrado
+          document.getElementById('studentForm').style.display = 'none';
+          addResults.innerHTML = `
+            <div class="no-results">
+              No se encontró la cédula en el sistema. ¿Desea agregar esta cédula al sistema? 
+              <button id="btnAgregarCedula" style="margin-left: 10px;">Agregar Cédula</button>
+            </div>
+          `;
         }
       } catch (error) {
         addResults.innerHTML = `<div class="error">${error.message}</div>`;
+      }
+    });
+
+    // Evento para botón agregar cédula (delegación)
+    document.body.addEventListener('click', (e) => {
+      if (e.target.id === 'btnAgregarCedula') {
+        const cedula = document.getElementById('searchCedula').value.trim();
+        document.getElementById('studentForm').style.display = 'block';
+        document.getElementById('addCedula').value = cedula;
+        document.getElementById('addNombre').value = '';
+        document.getElementById('addApellido').value = '';
+        document.getElementById('addCarrera').value = '';
+        document.getElementById('addSemestre').value = '';
+        
+        document.getElementById('addNombre').readOnly = false;
+        document.getElementById('addApellido').readOnly = false;
+        document.getElementById('addCarrera').readOnly = false;
+        document.getElementById('addSemestre').readOnly = false;
+        
+        document.getElementById('addNombre').style.background = 'white';
+        document.getElementById('addApellido').style.background = 'white';
+        document.getElementById('addCarrera').style.background = 'white';
+        document.getElementById('addSemestre').style.background = 'white';
+        
+        document.getElementById('addResults').innerHTML = '<div class="success">Complete los datos del nuevo alumno.</div>';
       }
     });
 
