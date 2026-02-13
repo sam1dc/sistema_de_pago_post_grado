@@ -28,6 +28,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "bulma": "^1.0.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

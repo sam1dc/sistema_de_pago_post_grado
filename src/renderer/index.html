@@ -3,146 +3,517 @@
 <head>
   <meta charset="UTF-8">
   <title>Sistema de Consulta de Pagos</title>
+  <link rel="stylesheet" href="../../node_modules/bulma/css/bulma.min.css">
+  <link rel="stylesheet" href="../../node_modules/@mdi/font/css/materialdesignicons.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h1 { color: #333; margin-bottom: 30px; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; }
-    .tab { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 16px; color: #666; border-bottom: 3px solid transparent; }
-    .tab.active { color: #007bff; border-bottom-color: #007bff; font-weight: bold; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .form-group { margin-bottom: 20px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
-    button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-right: 10px; }
-    button:hover { background: #0056b3; }
-    button.secondary { background: #6c757d; }
-    button.secondary:hover { background: #545b62; }
-    .directory-info { padding: 10px; background: #e9ecef; border-radius: 4px; margin-top: 10px; font-size: 13px; }
-    .results { margin-top: 30px; }
-    .summary { background: #f8f9fa; padding: 20px; border-radius: 4px; margin-bottom: 20px; }
-    .summary-item { margin-bottom: 10px; }
-    .summary-item strong { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { background: #007bff; color: white; }
-    tr:hover { background: #f8f9fa; }
-    .error { color: #dc3545; padding: 10px; background: #f8d7da; border-radius: 4px; margin-top: 10px; }
-    .success { color: #155724; padding: 10px; background: #d4edda; border-radius: 4px; margin-top: 10px; }
-    .no-results { color: #856404; padding: 10px; background: #fff3cd; border-radius: 4px; margin-top: 10px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .new-file-option { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
-    .confirm-dialog { padding: 15px; background: #fff3cd; border-radius: 4px; margin-top: 10px; border-left: 4px solid #ffc107; }
-    .confirm-dialog button { margin-top: 10px; }
+    :root {
+      --primary: #137fec;
+    }
+    body { 
+      background: #f5f7fa;
+      overflow: hidden;
+    }
+    .app-container {
+      display: flex;
+      height: 100vh;
+      position: relative;
+    }
+    .sidebar {
+      width: 260px;
+      background: white;
+      border-right: 1px solid #e8e8e8;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+    }
+    .sidebar-overlay.active {
+      display: block;
+    }
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+      color: #4a4a4a;
+    }
+    .hamburger-btn:hover {
+      color: var(--primary);
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .hamburger-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .app-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #363636;
+    }
+    .app-logo-accent {
+      color: var(--primary);
+    }
+    .sidebar-menu {
+      flex: 1;
+      padding: 1rem;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      color: #4a4a4a;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 0.25rem;
+    }
+    .menu-item:hover {
+      background: #f5f7fa;
+    }
+    .menu-item.is-active {
+      background: rgba(19, 127, 236, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .menu-item .mdi {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .top-bar {
+      background: white;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+    .card {
+      box-shadow: 0 0.5em 1em -0.125em rgba(10,10,10,.05), 0 0px 0 1px rgba(10,10,10,.02);
+    }
+    .directory-banner {
+      background: rgba(19, 127, 236, 0.1);
+      border-left: 4px solid var(--primary);
+    }
+    .button.is-primary {
+      background-color: var(--primary);
+    }
+    .button.is-primary:hover {
+      background-color: #0d6fd8;
+    }
+    .tabs.is-boxed li.is-active a {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+    }
+    .table thead th {
+      background: #f5f7fa;
+      color: #363636;
+      font-weight: 600;
+    }
+    .summary-box {
+      background: linear-gradient(135deg, var(--primary) 0%, #0d6fd8 100%);
+      color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.25rem;
+      border-left: 4px solid var(--primary);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Sistema de Consulta de Pagos de Alumnos</h1>
+  <div class="app-container">
+    <!-- Overlay para cerrar sidebar en móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
-    <div class="form-group">
-      <button id="selectDir">Seleccionar Directorio de Archivos Excel</button>
-      <div id="dirInfo" class="directory-info" style="display:none;"></div>
-    </div>
-
-    <div class="tabs">
-      <button class="tab active" data-tab="search">Consultar Pagos</button>
-      <button class="tab" data-tab="add">Agregar Pago</button>
-    </div>
-
-    <!-- Tab: Consultar Pagos -->
-    <div id="search-tab" class="tab-content active">
-      <div class="form-group">
-        <label for="cedula">Cédula del Alumno:</label>
-        <input type="text" id="cedula" placeholder="Ingrese la cédula">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="app-logo" style="display: flex; align-items: center; gap: 0.75rem;">
+          <img src="assets/logo.png" alt="Logo" style="height: 24px; width: 24px; object-fit: contain;">
+          <span>Sistema<span class="app-logo-accent">Pagos</span></span>
+        </div>
       </div>
-      <button id="searchBtn">Buscar</button>
-      <div id="results" class="results"></div>
-    </div>
+      <nav class="sidebar-menu">
+        <div class="menu-item is-active" data-tab="search">
+          <span class="mdi mdi-magnify"></span>
+          <span>Consultar Pagos</span>
+        </div>
+        <div class="menu-item" data-tab="add">
+          <span class="mdi mdi-plus-circle"></span>
+          <span>Agregar Pago</span>
+        </div>
+        <div class="menu-item" data-tab="config">
+          <span class="mdi mdi-cog"></span>
+          <span>Configuración</span>
+        </div>
+      </nav>
+    </aside>
 
-    <!-- Tab: Agregar Pago -->
-    <div id="add-tab" class="tab-content">
-      <div class="form-group">
-        <label for="searchCedula">Cédula del Alumno:</label>
-        <input type="text" id="searchCedula" placeholder="Ingrese la cédula para buscar">
-        <button id="searchStudentBtn" style="margin-top: 10px;">Buscar Alumno</button>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <button class="hamburger-btn" id="hamburgerBtn">
+            <span class="mdi mdi-menu" style="font-size: 1.5rem;"></span>
+          </button>
+          <h1 class="title is-4 mb-0">Sistema de Consulta de Pagos de Alumnos</h1>
+        </div>
       </div>
 
-      <div id="addResults" class="results"></div>
+      <!-- Content Area -->
+      <div class="content-wrapper">
+        <!-- Tab: Consultar Pagos -->
+        <div id="search-tab" class="tab-content active">
+          <div class="card">
+            <div class="card-content">
+              <h2 class="title is-5 mb-4">
+                <span class="icon-text">
+                  <span class="icon has-text-primary">
+                    <i class="mdi mdi-magnify"></i>
+                  </span>
+                  <span>Buscar Alumno</span>
+                </span>
+              </h2>
+              
+              <div class="field">
+                <label class="label">Cédula del Alumno</label>
+                <div class="control has-icons-left">
+                  <input class="input" type="text" id="cedula" placeholder="Ingrese la cédula">
+                  <span class="icon is-left">
+                    <i class="mdi mdi-card-account-details"></i>
+                  </span>
+                </div>
+              </div>
 
-      <div id="studentForm" style="display:none;">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="addCedula">Cédula:</label>
-            <input type="text" id="addCedula" placeholder="Cédula del alumno" readonly style="background: #e9ecef;">
-          </div>
-          <div class="form-group">
-            <label for="addNombre">Nombre:</label>
-            <input type="text" id="addNombre" placeholder="Nombre">
+              <div class="field">
+                <div class="control">
+                  <button class="button is-primary" id="searchBtn">
+                    <span class="icon">
+                      <i class="mdi mdi-magnify"></i>
+                    </span>
+                    <span>Buscar</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="results"></div>
+            </div>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="addApellido">Apellido:</label>
-            <input type="text" id="addApellido" placeholder="Apellido">
-          </div>
-          <div class="form-group">
-            <label for="addCarrera">Carrera:</label>
-            <input type="text" id="addCarrera" placeholder="Carrera">
+        <!-- Tab: Agregar Pago -->
+        <div id="add-tab" class="tab-content">
+          <div class="card">
+            <div class="card-content">
+              <h2 class="title is-5 mb-4">
+                <span class="icon-text">
+                  <span class="icon has-text-primary">
+                    <i class="mdi mdi-plus-circle"></i>
+                  </span>
+                  <span>Agregar Nuevo Pago</span>
+                </span>
+              </h2>
+
+              <div class="field">
+                <label class="label">Cédula del Alumno</label>
+                <div class="field has-addons">
+                  <div class="control is-expanded has-icons-left">
+                    <input class="input" type="text" id="searchCedula" placeholder="Ingrese la cédula para buscar">
+                    <span class="icon is-left">
+                      <i class="mdi mdi-card-account-details"></i>
+                    </span>
+                  </div>
+                  <div class="control">
+                    <button class="button is-primary" id="searchStudentBtn">
+                      <span class="icon">
+                        <i class="mdi mdi-magnify"></i>
+                      </span>
+                      <span>Buscar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="addResults"></div>
+
+              <div id="studentForm" class="hidden">
+                <hr class="my-5">
+                
+                <h3 class="subtitle is-6 mb-4">Información del Estudiante</h3>
+                
+                <div class="columns">
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Cédula</label>
+                      <div class="control">
+                        <input class="input" type="text" id="addCedula" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Nombre</label>
+                      <div class="control">
+                        <input class="input" type="text" id="addNombre" placeholder="Nombre">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="columns">
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Apellido</label>
+                      <div class="control">
+                        <input class="input" type="text" id="addApellido" placeholder="Apellido">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Carrera</label>
+                      <div class="control">
+                        <input class="input" type="text" id="addCarrera" placeholder="Carrera">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h3 class="subtitle is-6 mb-4 mt-5">Detalles del Pago</h3>
+
+                <div class="field">
+                  <label class="label">Semestre</label>
+                  <div class="control">
+                    <input class="input" type="text" id="addSemestre" placeholder="Ej: 2026-1">
+                  </div>
+                </div>
+
+                <div class="columns">
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Fecha</label>
+                      <div class="control">
+                        <input class="input" type="date" id="addFecha">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Nro. Referencia</label>
+                      <div class="control">
+                        <input class="input" type="text" id="addReferencia" placeholder="Número de referencia">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="columns">
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Total a Pagar</label>
+                      <div class="control has-icons-left">
+                        <input class="input" type="number" id="addTotalPagar" placeholder="0.00" step="0.01">
+                        <span class="icon is-left">
+                          <i class="mdi mdi-currency-usd"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="field">
+                      <label class="label">Pago</label>
+                      <div class="control has-icons-left">
+                        <input class="input" type="number" id="addPago" placeholder="0.00" step="0.01">
+                        <span class="icon is-left">
+                          <i class="mdi mdi-currency-usd"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Cuánto Debe</label>
+                  <div class="control has-icons-left">
+                    <input class="input" type="number" id="addDebe" placeholder="0.00" step="0.01" readonly>
+                    <span class="icon is-left">
+                      <i class="mdi mdi-currency-usd"></i>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Archivo Excel</label>
+                  <div class="control">
+                    <div class="select is-fullwidth">
+                      <select id="fileSelect">
+                        <option value="">Seleccione un archivo</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="box mt-3">
+                  <label class="checkbox">
+                    <input type="checkbox" id="createNewFile">
+                    Crear nuevo archivo
+                  </label>
+                  <div class="field mt-3 hidden" id="newFileField">
+                    <div class="control">
+                      <input class="input" type="text" id="newFileName" placeholder="Nombre del archivo (ej: pagos_2026-1.xlsx)">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field is-grouped mt-5">
+                  <div class="control">
+                    <button class="button is-primary" id="addPaymentBtn">
+                      <span class="icon">
+                        <i class="mdi mdi-content-save"></i>
+                      </span>
+                      <span>Agregar Pago</span>
+                    </button>
+                  </div>
+                  <div class="control">
+                    <button class="button is-light" id="cancelBtn">
+                      <span class="icon">
+                        <i class="mdi mdi-close"></i>
+                      </span>
+                      <span>Cancelar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="addSemestre">Semestre:</label>
-          <input type="text" id="addSemestre" placeholder="Ej: 2026-1">
-        </div>
+        <!-- Tab: Configuración -->
+        <div id="config-tab" class="tab-content">
+          <div class="card">
+            <div class="card-content">
+              <h2 class="title is-5 mb-4">
+                <span class="icon-text">
+                  <span class="icon has-text-primary">
+                    <i class="mdi mdi-cog"></i>
+                  </span>
+                  <span>Configuración</span>
+                </span>
+              </h2>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="addFecha">Fecha:</label>
-            <input type="date" id="addFecha">
-          </div>
-          <div class="form-group">
-            <label for="addReferencia">Nro. Referencia:</label>
-            <input type="text" id="addReferencia" placeholder="Número de referencia">
-          </div>
-        </div>
+              <div class="box">
+                <h3 class="subtitle is-6 mb-3">Directorio de Archivos Excel</h3>
+                <p class="mb-3 has-text-grey">Directorio actual:</p>
+                <div class="notification directory-banner mb-4">
+                  <span class="icon-text">
+                    <span class="icon has-text-primary">
+                      <i class="mdi mdi-folder"></i>
+                    </span>
+                    <span id="currentDirPath"></span>
+                  </span>
+                </div>
+                <button class="button is-primary" id="changeDirBtn">
+                  <span class="icon">
+                    <i class="mdi mdi-folder-open"></i>
+                  </span>
+                  <span>Cambiar Directorio</span>
+                </button>
+              </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="addTotalPagar">Total a Pagar:</label>
-            <input type="number" id="addTotalPagar" placeholder="0.00" step="0.01">
-          </div>
-          <div class="form-group">
-            <label for="addPago">Pago:</label>
-            <input type="number" id="addPago" placeholder="0.00" step="0.01">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="addDebe">Cuánto Debe:</label>
-          <input type="number" id="addDebe" placeholder="0.00" step="0.01" readonly style="background: #e9ecef;">
-        </div>
-
-        <div class="form-group">
-          <label for="fileSelect">Archivo Excel:</label>
-          <select id="fileSelect">
-            <option value="">Seleccione un archivo</option>
-          </select>
-          <div class="new-file-option">
-            <label>
-              <input type="checkbox" id="createNewFile"> Crear nuevo archivo
-            </label>
-            <input type="text" id="newFileName" placeholder="Nombre del archivo (ej: pagos_2026-1.xlsx)" style="margin-top: 10px; display: none;">
+              <div class="box">
+                <h3 class="subtitle is-6 mb-3">Archivos Excel Encontrados</h3>
+                <div id="filesList" class="content"></div>
+              </div>
+            </div>
           </div>
         </div>
-
-        <button id="addPaymentBtn">Agregar Pago</button>
-        <button class="secondary" id="cancelBtn">Cancelar</button>
       </div>
+    </main>
+  </div>
+
+  <!-- Modal de Directorio Inicial -->
+  <div class="modal is-active" id="initialModal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">
+          <span class="icon-text">
+            <span class="icon has-text-primary">
+              <i class="mdi mdi-folder-open"></i>
+            </span>
+            <span>Configuración Inicial</span>
+          </span>
+        </p>
+      </header>
+      <section class="modal-card-body">
+        <div class="content">
+          <p>Para comenzar a usar la aplicación, selecciona el directorio donde se encuentran los archivos Excel de pagos.</p>
+          <div class="notification is-info is-light">
+            <span class="icon-text">
+              <span class="icon">
+                <i class="mdi mdi-information"></i>
+              </span>
+              <span>Este directorio se guardará y podrás cambiarlo desde Configuración.</span>
+            </span>
+          </div>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-primary is-fullwidth" id="selectInitialDir">
+          <span class="icon">
+            <i class="mdi mdi-folder-open"></i>
+          </span>
+          <span>Seleccionar Directorio</span>
+        </button>
+      </footer>
     </div>
   </div>
 
@@ -150,26 +521,90 @@
     let selectedDirectory = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Tabs
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      // Verificar si hay directorio guardado
+      const savedDir = localStorage.getItem('excelDirectory');
+      if (savedDir) {
+        selectedDirectory = savedDir;
+        document.getElementById('initialModal').classList.remove('is-active');
+        updateDirectoryDisplay();
+        loadExcelFiles();
+      }
+
+      // Toggle sidebar en móvil
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+      hamburgerBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+      });
+
+      sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      });
+
+      // Sidebar Navigation
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const tabName = item.dataset.tab;
+          console.log('Clicked tab:', tabName);
+          
+          // Remover active de todos los items
+          document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('is-active'));
+          
+          // Ocultar todos los tabs
           document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          tab.classList.add('active');
-          document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+          
+          // Activar el item clickeado
+          item.classList.add('is-active');
+          
+          // Mostrar el tab correspondiente
+          const tabElement = document.getElementById(tabName + '-tab');
+          if (tabElement) {
+            tabElement.classList.add('active');
+            console.log('Showing tab:', tabName + '-tab');
+          } else {
+            console.error('Tab not found:', tabName + '-tab');
+          }
+
+          // Cerrar sidebar en móvil después de seleccionar
+          sidebar.classList.remove('active');
+          sidebarOverlay.classList.remove('active');
         });
       });
 
-    // Seleccionar directorio
-    document.getElementById('selectDir').addEventListener('click', async () => {
+    // Seleccionar directorio inicial
+    document.getElementById('selectInitialDir').addEventListener('click', async () => {
       const dir = await window.electronAPI.selectDirectory();
       if (dir) {
         selectedDirectory = dir;
-        document.getElementById('dirInfo').style.display = 'block';
-        document.getElementById('dirInfo').textContent = `Directorio seleccionado: ${dir}`;
+        localStorage.setItem('excelDirectory', dir);
+        document.getElementById('initialModal').classList.remove('is-active');
+        updateDirectoryDisplay();
         await loadExcelFiles();
       }
     });
+
+    // Cambiar directorio desde configuración
+    document.getElementById('changeDirBtn').addEventListener('click', async () => {
+      const dir = await window.electronAPI.selectDirectory();
+      if (dir) {
+        selectedDirectory = dir;
+        localStorage.setItem('excelDirectory', dir);
+        updateDirectoryDisplay();
+        await loadExcelFiles();
+      }
+    });
+
+    // Actualizar display del directorio
+    function updateDirectoryDisplay() {
+      const currentDirPath = document.getElementById('currentDirPath');
+      if (currentDirPath) {
+        currentDirPath.textContent = selectedDirectory || 'No seleccionado';
+      }
+    }
 
     // Cargar archivos Excel
     async function loadExcelFiles() {
@@ -177,27 +612,42 @@
       try {
         const files = await window.electronAPI.getExcelFiles(selectedDirectory);
         const select = document.getElementById('fileSelect');
-        select.innerHTML = '<option value="">Seleccione un archivo</option>';
-        files.forEach(file => {
-          const option = document.createElement('option');
-          option.value = file;
-          option.textContent = file;
-          select.appendChild(option);
-        });
+        if (select) {
+          select.innerHTML = '<option value="">Seleccione un archivo</option>';
+          files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            select.appendChild(option);
+          });
+        }
+        updateFilesList(files);
       } catch (error) {
         console.error('Error al cargar archivos:', error);
       }
     }
 
+    // Actualizar lista de archivos en vista de directorio
+    function updateFilesList(files) {
+      const filesList = document.getElementById('filesList');
+      if (filesList && files) {
+        if (files.length === 0) {
+          filesList.innerHTML = '<p class="has-text-grey">No se encontraron archivos Excel en este directorio.</p>';
+        } else {
+          filesList.innerHTML = '<ul>' + files.map(f => `<li><span class="icon-text"><span class="icon has-text-info"><i class="mdi mdi-file-excel"></i></span><span>${f}</span></span></li>`).join('') + '</ul>';
+        }
+      }
+    }
+
     // Toggle crear nuevo archivo
     document.getElementById('createNewFile').addEventListener('change', (e) => {
-      const newFileInput = document.getElementById('newFileName');
+      const newFileField = document.getElementById('newFileField');
       const fileSelect = document.getElementById('fileSelect');
       if (e.target.checked) {
-        newFileInput.style.display = 'block';
+        newFileField.classList.remove('hidden');
         fileSelect.disabled = true;
       } else {
-        newFileInput.style.display = 'none';
+        newFileField.classList.add('hidden');
         fileSelect.disabled = false;
       }
     });
@@ -219,12 +669,12 @@
       const addResults = document.getElementById('addResults');
 
       if (!selectedDirectory) {
-        addResults.innerHTML = '<div class="error">Por favor, seleccione un directorio primero.</div>';
+        addResults.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
         return;
       }
 
       if (!cedula) {
-        addResults.innerHTML = '<div class="error">Por favor, ingrese una cédula.</div>';
+        addResults.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese una cédula.</div>';
         return;
       }
 
@@ -233,7 +683,7 @@
         
         if (data) {
           // Estudiante encontrado - autocompletar
-          document.getElementById('studentForm').style.display = 'block';
+          document.getElementById('studentForm').classList.remove('hidden');
           document.getElementById('addCedula').value = cedula;
           document.getElementById('addNombre').value = data.student.nombre;
           document.getElementById('addApellido').value = data.student.apellido;
@@ -245,24 +695,20 @@
           document.getElementById('addCarrera').readOnly = true;
           document.getElementById('addSemestre').readOnly = false;
           
-          document.getElementById('addNombre').style.background = '#e9ecef';
-          document.getElementById('addApellido').style.background = '#e9ecef';
-          document.getElementById('addCarrera').style.background = '#e9ecef';
-          document.getElementById('addSemestre').style.background = 'white';
-          
-          addResults.innerHTML = '<div class="success">Estudiante encontrado. Datos autocompletados.</div>';
+          addResults.innerHTML = '<div class="notification is-success"><button class="delete"></button>Estudiante encontrado. Datos autocompletados.</div>';
         } else {
           // Estudiante no encontrado
-          document.getElementById('studentForm').style.display = 'none';
+          document.getElementById('studentForm').classList.add('hidden');
           addResults.innerHTML = `
-            <div class="no-results">
+            <div class="notification is-warning">
+              <button class="delete"></button>
               No se encontró la cédula en el sistema. ¿Desea agregar esta cédula al sistema? 
-              <button id="btnAgregarCedula" style="margin-left: 10px;">Agregar Cédula</button>
+              <button class="button is-small is-warning mt-2" id="btnAgregarCedula">Agregar Cédula</button>
             </div>
           `;
         }
       } catch (error) {
-        addResults.innerHTML = `<div class="error">${error.message}</div>`;
+        addResults.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
       }
     });
 
@@ -270,7 +716,7 @@
     document.body.addEventListener('click', (e) => {
       if (e.target.id === 'btnAgregarCedula') {
         const cedula = document.getElementById('searchCedula').value.trim();
-        document.getElementById('studentForm').style.display = 'block';
+        document.getElementById('studentForm').classList.remove('hidden');
         document.getElementById('addCedula').value = cedula;
         document.getElementById('addNombre').value = '';
         document.getElementById('addApellido').value = '';
@@ -282,18 +728,18 @@
         document.getElementById('addCarrera').readOnly = false;
         document.getElementById('addSemestre').readOnly = false;
         
-        document.getElementById('addNombre').style.background = 'white';
-        document.getElementById('addApellido').style.background = 'white';
-        document.getElementById('addCarrera').style.background = 'white';
-        document.getElementById('addSemestre').style.background = 'white';
-        
-        document.getElementById('addResults').innerHTML = '<div class="success">Complete los datos del nuevo alumno.</div>';
+        document.getElementById('addResults').innerHTML = '<div class="notification is-success"><button class="delete"></button>Complete los datos del nuevo alumno.</div>';
+      }
+      
+      // Cerrar notificaciones
+      if (e.target.classList.contains('delete')) {
+        e.target.parentElement.remove();
       }
     });
 
     // Cancelar y limpiar formulario
     document.getElementById('cancelBtn').addEventListener('click', () => {
-      document.getElementById('studentForm').style.display = 'none';
+      document.getElementById('studentForm').classList.add('hidden');
       document.getElementById('searchCedula').value = '';
       document.getElementById('addResults').innerHTML = '';
       clearAddForm();
@@ -315,11 +761,6 @@
       document.getElementById('addApellido').readOnly = false;
       document.getElementById('addCarrera').readOnly = false;
       document.getElementById('addSemestre').readOnly = false;
-      
-      document.getElementById('addNombre').style.background = 'white';
-      document.getElementById('addApellido').style.background = 'white';
-      document.getElementById('addCarrera').style.background = 'white';
-      document.getElementById('addSemestre').style.background = 'white';
     }
 
     // Buscar alumno
@@ -328,12 +769,12 @@
       const resultsDiv = document.getElementById('results');
 
       if (!selectedDirectory) {
-        resultsDiv.innerHTML = '<div class="error">Por favor, seleccione un directorio primero.</div>';
+        resultsDiv.innerHTML = '<div class="notification is-danger mt-4"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
         return;
       }
 
       if (!cedula) {
-        resultsDiv.innerHTML = '<div class="error">Por favor, ingrese una cédula.</div>';
+        resultsDiv.innerHTML = '<div class="notification is-danger mt-4"><button class="delete"></button>Por favor, ingrese una cédula.</div>';
         return;
       }
 
@@ -341,52 +782,69 @@
         const data = await window.electronAPI.searchStudent(selectedDirectory, cedula);
 
         if (!data) {
-          resultsDiv.innerHTML = '<div class="no-results">No se encontraron registros para esta cédula.</div>';
+          resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros para esta cédula.</div>';
           return;
         }
 
         const { student, payments, totalDebt, semesters } = data;
 
         let html = `
-          <div class="summary">
-            <h2>Información del Alumno</h2>
-            <div class="summary-item"><strong>Nombre:</strong> ${student.nombre} ${student.apellido}</div>
-            <div class="summary-item"><strong>Cédula:</strong> ${student.cedula}</div>
-            <div class="summary-item"><strong>Carrera:</strong> ${student.carrera}</div>
-            <div class="summary-item"><strong>Deuda Total:</strong> $${totalDebt.toFixed(2)}</div>
-            <div class="summary-item"><strong>Semestres con Pagos:</strong> ${semesters}</div>
+          <div class="box summary-box mt-5">
+            <h2 class="title is-5 has-text-white mb-4">Información del Alumno</h2>
+            <div class="columns is-multiline">
+              <div class="column is-6">
+                <p class="has-text-white-ter mb-2"><strong class="has-text-white">Nombre:</strong> ${student.nombre} ${student.apellido}</p>
+                <p class="has-text-white-ter mb-2"><strong class="has-text-white">Cédula:</strong> ${student.cedula}</p>
+              </div>
+              <div class="column is-6">
+                <p class="has-text-white-ter mb-2"><strong class="has-text-white">Carrera:</strong> ${student.carrera}</p>
+                <p class="has-text-white-ter mb-2"><strong class="has-text-white">Semestres:</strong> ${semesters}</p>
+              </div>
+              <div class="column is-12">
+                <p class="title is-3 has-text-white mt-2">Deuda Total: $${totalDebt.toFixed(2)}</p>
+              </div>
+            </div>
           </div>
 
-          <h3>Historial de Pagos</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Semestre</th>
-                <th>Nro. Referencia</th>
-                <th>Total a Pagar</th>
-                <th>Pago</th>
-                <th>Debe</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${payments.map(p => `
+          <h3 class="title is-5 mt-5 mb-3">
+            <span class="icon-text">
+              <span class="icon has-text-primary">
+                <i class="mdi mdi-history"></i>
+              </span>
+              <span>Historial de Pagos</span>
+            </span>
+          </h3>
+          <div class="table-container">
+            <table class="table is-fullwidth is-hoverable">
+              <thead>
                 <tr>
-                  <td>${p.fecha || 'N/A'}</td>
-                  <td>${p.semestre}</td>
-                  <td>${p.nro_referencia_del_pago || 'N/A'}</td>
-                  <td>$${(p.total_a_pagar || 0).toFixed(2)}</td>
-                  <td>$${(p.pago || 0).toFixed(2)}</td>
-                  <td>$${(p.cuanto_debe || 0).toFixed(2)}</td>
+                  <th>Fecha</th>
+                  <th>Semestre</th>
+                  <th>Nro. Referencia</th>
+                  <th>Total a Pagar</th>
+                  <th>Pago</th>
+                  <th>Debe</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                ${payments.map(p => `
+                  <tr>
+                    <td>${p.fecha || 'N/A'}</td>
+                    <td><span class="tag is-info is-light">${p.semestre}</span></td>
+                    <td>${p.nro_referencia_del_pago || 'N/A'}</td>
+                    <td><strong>$${(p.total_a_pagar || 0).toFixed(2)}</strong></td>
+                    <td><span class="tag is-success">$${(p.pago || 0).toFixed(2)}</span></td>
+                    <td><span class="tag ${p.cuanto_debe > 0 ? 'is-warning' : 'is-success'}">$${(p.cuanto_debe || 0).toFixed(2)}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
         `;
 
         resultsDiv.innerHTML = html;
       } catch (error) {
-        resultsDiv.innerHTML = `<div class="error">${error.message}</div>`;
+        resultsDiv.innerHTML = `<div class="notification is-danger mt-4"><button class="delete"></button>${error.message}</div>`;
       }
     });
 
@@ -395,7 +853,7 @@
       const resultsDiv = document.getElementById('addResults');
 
       if (!selectedDirectory) {
-        resultsDiv.innerHTML = '<div class="error">Por favor, seleccione un directorio primero.</div>';
+        resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
         return;
       }
 
@@ -405,14 +863,14 @@
       if (createNew) {
         fileName = document.getElementById('newFileName').value.trim();
         if (!fileName) {
-          resultsDiv.innerHTML = '<div class="error">Por favor, ingrese el nombre del archivo.</div>';
+          resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese el nombre del archivo.</div>';
           return;
         }
         if (!fileName.endsWith('.xlsx')) fileName += '.xlsx';
       } else {
         fileName = document.getElementById('fileSelect').value;
         if (!fileName) {
-          resultsDiv.innerHTML = '<div class="error">Por favor, seleccione un archivo.</div>';
+          resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un archivo.</div>';
           return;
         }
       }
@@ -431,23 +889,23 @@
       };
 
       if (!paymentData.cedula || !paymentData.nombre || !paymentData.apellido) {
-        resultsDiv.innerHTML = '<div class="error">Por favor, complete los campos obligatorios (Cédula, Nombre, Apellido).</div>';
+        resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, complete los campos obligatorios (Cédula, Nombre, Apellido).</div>';
         return;
       }
 
       try {
         await window.electronAPI.addPayment(selectedDirectory, fileName, paymentData);
-        resultsDiv.innerHTML = '<div class="success">¡Pago agregado exitosamente!</div>';
+        resultsDiv.innerHTML = '<div class="notification is-success"><button class="delete"></button>¡Pago agregado exitosamente!</div>';
         
         // Limpiar formulario
-        document.getElementById('studentForm').style.display = 'none';
+        document.getElementById('studentForm').classList.add('hidden');
         document.getElementById('searchCedula').value = '';
         clearAddForm();
         
         if (createNew) {
           document.getElementById('newFileName').value = '';
           document.getElementById('createNewFile').checked = false;
-          document.getElementById('newFileName').style.display = 'none';
+          document.getElementById('newFileField').classList.add('hidden');
           document.getElementById('fileSelect').disabled = false;
         }
         
@@ -457,7 +915,7 @@
           resultsDiv.innerHTML = '';
         }, 3000);
       } catch (error) {
-        resultsDiv.innerHTML = `<div class="error">${error.message}</div>`;
+        resultsDiv.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
       }
     });
 
