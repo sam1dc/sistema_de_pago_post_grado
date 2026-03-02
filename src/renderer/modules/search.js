@@ -2,6 +2,9 @@
 export async function searchStudent(selectedDirectory) {
   const cedula = document.getElementById('cedula').value.trim();
   const maestriaFilter = document.getElementById('searchMaestriaFilter').value;
+  const trimestreFilter = document.getElementById('searchTrimestreFilter').value;
+  const fechaDesde = document.getElementById('searchFechaDesde').value;
+  const fechaHasta = document.getElementById('searchFechaHasta').value;
   const resultsDiv = document.getElementById('results');
 
   if (!selectedDirectory) {
@@ -9,23 +12,144 @@ export async function searchStudent(selectedDirectory) {
     return;
   }
 
-  if (!cedula && !maestriaFilter) {
-    resultsDiv.innerHTML = '<div class="notification is-danger mt-4"><button class="delete"></button>Por favor, ingrese una cédula o seleccione una maestría.</div>';
+  if (!cedula && !maestriaFilter && !trimestreFilter && !fechaDesde && !fechaHasta) {
+    resultsDiv.innerHTML = '<div class="notification is-danger mt-4"><button class="delete"></button>Por favor, ingrese una cédula o seleccione al menos un filtro.</div>';
     return;
   }
 
   try {
-    // Búsqueda solo por maestría
-    if (!cedula && maestriaFilter) {
-      await searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDiv);
+    // Búsqueda solo por filtros (sin cédula)
+    if (!cedula && (maestriaFilter || trimestreFilter || fechaDesde || fechaHasta)) {
+      await searchByFilters(selectedDirectory, maestriaFilter, trimestreFilter, fechaDesde, fechaHasta, resultsDiv);
       return;
     }
     
-    // Búsqueda por cédula (con o sin filtro de maestría)
-    await searchByCedula(selectedDirectory, cedula, maestriaFilter, resultsDiv);
+    // Búsqueda por cédula (con o sin filtros)
+    await searchByCedula(selectedDirectory, cedula, maestriaFilter, trimestreFilter, fechaDesde, fechaHasta, resultsDiv);
   } catch (error) {
     resultsDiv.innerHTML = `<div class="notification is-danger mt-4"><button class="delete"></button>${error.message}</div>`;
   }
+}
+
+async function searchByFilters(selectedDirectory, maestriaFilter, trimestreFilter, fechaDesde, fechaHasta, resultsDiv) {
+  let students = [];
+  
+  if (maestriaFilter) {
+    students = await window.electronAPI.searchByMaestria(selectedDirectory, maestriaFilter);
+  } else {
+    // Si no hay filtro de maestría, obtener todos los registros
+    const allFiles = await window.electronAPI.getExcelFiles(selectedDirectory);
+    for (const file of allFiles) {
+      const sheets = await window.electronAPI.getSheetNames(selectedDirectory, file);
+      for (const sheet of sheets) {
+        const data = await window.electronAPI.searchByMaestria(selectedDirectory, sheet);
+        if (data) students.push(...data);
+      }
+    }
+  }
+  
+  if (!students || students.length === 0) {
+    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros.</div>';
+    return;
+  }
+  
+  let allPayments = students.flatMap(s => s.payments);
+  
+  // Aplicar filtros
+  if (trimestreFilter) {
+    allPayments = allPayments.filter(p => p.trimestre === trimestreFilter);
+  }
+  
+  if (fechaDesde || fechaHasta) {
+    allPayments = allPayments.filter(p => {
+      if (!p.fecha) return false;
+      // Convertir fecha del formato DD/MM/YYYY a YYYY-MM-DD
+      const parts = p.fecha.split('/');
+      if (parts.length === 3) {
+        const fechaPago = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        
+        if (fechaDesde && fechaHasta) {
+          return fechaPago >= fechaDesde && fechaPago <= fechaHasta;
+        } else if (fechaDesde) {
+          return fechaPago >= fechaDesde;
+        } else if (fechaHasta) {
+          return fechaPago <= fechaHasta;
+        }
+      }
+      return false;
+    });
+  }
+  
+  if (allPayments.length === 0) {
+    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros con los filtros seleccionados.</div>';
+    return;
+  }
+  
+  const uniqueStudents = [...new Set(allPayments.map(p => p.cedula))].length;
+  
+  const html = `
+    <div class="box mt-5">
+      <h2 class="title is-5 mb-4">Resultados de Búsqueda</h2>
+      <div class="columns">
+        <div class="column">
+          <p><strong>Total de estudiantes:</strong> ${uniqueStudents}</p>
+        </div>
+        <div class="column">
+          <p><strong>Total de pagos:</strong> ${allPayments.length}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="table is-fullwidth is-hoverable is-striped">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Fecha</th>
+            <th>Trimestre</th>
+            <th>Maestría</th>
+            <th>Asignatura</th>
+            <th>U.C</th>
+            <th>Costo U.C</th>
+            <th>Total a Pagar</th>
+            <th>Abono</th>
+            <th>Resta</th>
+            <th>Observación</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${allPayments.map(p => `
+            <tr>
+              <td>${p.nombre_completo}</td>
+              <td>${p.cedula}</td>
+              <td>${p.fecha || 'N/A'}</td>
+              <td><span class="tag is-info is-light">${p.trimestre}</span></td>
+              <td><span class="tag is-link is-light">${p._sheet || 'N/A'}</span></td>
+              <td>${p.asignatura || 'N/A'}</td>
+              <td>${p.uc || ''}</td>
+              <td>$${(p.costo_uc || 0).toFixed(2)}</td>
+              <td><strong>$${(p.total_a_pagar || 0).toFixed(2)}</strong></td>
+              <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
+              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
+              <td>${p.observacion || ''}</td>
+              <td>
+                <button class="button is-small is-info btnVerDetalles" data-cedula="${p.cedula}">
+                  <span class="icon is-small">
+                    <i class="mdi mdi-eye"></i>
+                  </span>
+                  <span>Ver</span>
+                </button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  resultsDiv.innerHTML = html;
 }
 
 async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDiv) {
@@ -37,7 +161,6 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
   }
   
   const allPayments = students.flatMap(s => s.payments);
-  const totalDeuda = students.reduce((sum, s) => sum + s.totalDebt, 0);
   
   const html = `
     <div class="box mt-5">
@@ -48,9 +171,6 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
         </div>
         <div class="column">
           <p><strong>Total de pagos:</strong> ${allPayments.length}</p>
-        </div>
-        <div class="column">
-          <p><strong>Deuda total:</strong> <span class="tag ${totalDeuda > 0 ? 'is-warning' : 'is-success'} is-large">$${totalDeuda.toFixed(2)}</span></p>
         </div>
       </div>
     </div>
@@ -88,12 +208,12 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
               <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
               <td>
-                ${p.resta > 0 ? `<button class="button is-small is-warning btnPagarFila" data-cedula="${p.cedula}" data-nombre="${p.nombre_completo}" data-deuda="${p.resta}">
+                <button class="button is-small is-info btnVerDetalles" data-cedula="${p.cedula}">
                   <span class="icon is-small">
-                    <i class="mdi mdi-cash"></i>
+                    <i class="mdi mdi-eye"></i>
                   </span>
-                  <span>Pagar</span>
-                </button>` : '<span class="tag is-success">Pagado</span>'}
+                  <span>Ver</span>
+                </button>
               </td>
             </tr>
           `).join('')}
@@ -105,7 +225,7 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
   resultsDiv.innerHTML = html;
 }
 
-async function searchByCedula(selectedDirectory, cedula, maestriaFilter, resultsDiv) {
+async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimestreFilter, fechaDesde, fechaHasta, resultsDiv) {
   const data = await window.electronAPI.searchStudent(selectedDirectory, cedula);
 
   if (!data) {
@@ -115,16 +235,53 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, results
 
   let { student, payments, totalDebt, trimestres } = data;
   
+  // Aplicar filtros
   if (maestriaFilter) {
     payments = payments.filter(p => p._sheet === maestriaFilter);
-    if (payments.length === 0) {
-      resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros para esta cédula en la maestría seleccionada.</div>';
-      return;
-    }
-    totalDebt = payments.reduce((sum, p) => sum + (Number(p.resta) || 0), 0);
-    const trimestresSet = new Set(payments.map(p => p.trimestre));
-    trimestres = trimestresSet.size;
   }
+  
+  if (trimestreFilter) {
+    payments = payments.filter(p => p.trimestre === trimestreFilter);
+  }
+  
+  if (fechaDesde || fechaHasta) {
+    payments = payments.filter(p => {
+      if (!p.fecha) return false;
+      const parts = p.fecha.split('/');
+      if (parts.length === 3) {
+        const fechaPago = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        
+        if (fechaDesde && fechaHasta) {
+          return fechaPago >= fechaDesde && fechaPago <= fechaHasta;
+        } else if (fechaDesde) {
+          return fechaPago >= fechaDesde;
+        } else if (fechaHasta) {
+          return fechaPago <= fechaHasta;
+        }
+      }
+      return false;
+    });
+  }
+  
+  if (payments.length === 0) {
+    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros para esta cédula con los filtros seleccionados.</div>';
+    return;
+  }
+  
+  // Recalcular deuda y trimestres según filtros
+  const debtByFileSheet = {};
+  payments.forEach(record => {
+    const key = `${record._file}|${record._sheet}`;
+    debtByFileSheet[key] = record;
+  });
+  
+  totalDebt = 0;
+  Object.values(debtByFileSheet).forEach(record => {
+    totalDebt += Number(record.resta) || 0;
+  });
+  
+  const trimestresSet = new Set(payments.map(p => p.trimestre));
+  trimestres = trimestresSet.size;
 
   const html = `
     <div class="box summary-box mt-5">

@@ -25,20 +25,38 @@ export async function loadMaestrias(selectedDirectory) {
   try {
     const files = await window.electronAPI.getExcelFiles(selectedDirectory);
     const maestriasSet = new Set();
+    const trimestresSet = new Set();
     
     for (const file of files) {
       const sheets = await window.electronAPI.getSheetNames(selectedDirectory, file);
       sheets.forEach(sheet => maestriasSet.add(sheet));
+      
+      // Extraer trimestre del nombre del archivo
+      const match = file.match(/\d{4}-\d+/);
+      if (match) trimestresSet.add(match[0]);
     }
     
+    // Cargar maestrías
     const searchFilter = document.getElementById('searchMaestriaFilter');
     if (searchFilter) {
-      searchFilter.innerHTML = '<option value="">Seleccione una maestría</option>';
+      searchFilter.innerHTML = '<option value="">Todas las maestrías</option>';
       Array.from(maestriasSet).sort().forEach(maestria => {
         const option = document.createElement('option');
         option.value = maestria;
         option.textContent = maestria;
         searchFilter.appendChild(option);
+      });
+    }
+    
+    // Cargar trimestres
+    const trimestreFilter = document.getElementById('searchTrimestreFilter');
+    if (trimestreFilter) {
+      trimestreFilter.innerHTML = '<option value="">Todos los trimestres</option>';
+      Array.from(trimestresSet).sort().forEach(trimestre => {
+        const option = document.createElement('option');
+        option.value = trimestre;
+        option.textContent = trimestre;
+        trimestreFilter.appendChild(option);
       });
     }
   } catch (error) {

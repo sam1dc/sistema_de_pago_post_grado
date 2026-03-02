@@ -24,19 +24,64 @@
       <div class="control">
         <div class="select is-fullwidth">
           <select id="searchMaestriaFilter">
-            <option value="">Seleccione una maestría</option>
+            <option value="">Todas las maestrías</option>
           </select>
         </div>
       </div>
     </div>
 
-    <div class="field">
+    <div class="columns">
+      <div class="column">
+        <div class="field">
+          <label class="label">Filtrar por Trimestre</label>
+          <div class="control">
+            <div class="select is-fullwidth">
+              <select id="searchTrimestreFilter">
+                <option value="">Todos los trimestres</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box">
+      <p class="label">Filtrar por Rango de Fechas</p>
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label is-small">Desde</label>
+            <div class="control">
+              <input class="input" type="date" id="searchFechaDesde">
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label is-small">Hasta</label>
+            <div class="control">
+              <input class="input" type="date" id="searchFechaHasta">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field is-grouped">
       <div class="control">
         <button class="button is-primary" id="searchBtn">
           <span class="icon">
             <i class="mdi mdi-magnify"></i>
           </span>
           <span>Buscar</span>
+        </button>
+      </div>
+      <div class="control">
+        <button class="button is-light" id="clearSearchBtn">
+          <span class="icon">
+            <i class="mdi mdi-close"></i>
+          </span>
+          <span>Limpiar</span>
         </button>
       </div>
     </div>

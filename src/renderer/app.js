@@ -262,7 +262,24 @@ function setupEventListeners() {
       }, 100);
     }
     
-    // Botón Pagar (desde tabla de maestría)
+    // Botón Ver Detalles (desde tabla de maestría)
+    if (e.target.closest('.btnVerDetalles')) {
+      const btn = e.target.closest('.btnVerDetalles');
+      const cedula = btn.dataset.cedula;
+      
+      // Buscar el estudiante por cédula
+      const cedulaInput = document.getElementById('cedula');
+      if (cedulaInput) cedulaInput.value = cedula;
+      
+      // Limpiar filtro de maestría
+      const maestriaFilter = document.getElementById('searchMaestriaFilter');
+      if (maestriaFilter) maestriaFilter.value = '';
+      
+      // Ejecutar búsqueda
+      searchStudent(selectedDirectory);
+    }
+    
+    // Botón Pagar (desde tabla de maestría) - MANTENER POR COMPATIBILIDAD
     if (e.target.closest('.btnPagarFila')) {
       const btn = e.target.closest('.btnPagarFila');
       const cedula = btn.dataset.cedula;
@@ -321,6 +338,19 @@ function setupEventListeners() {
   const searchBtn = document.getElementById('searchBtn');
   if (searchBtn) {
     searchBtn.addEventListener('click', () => searchStudent(selectedDirectory));
+  }
+
+  // Limpiar búsqueda
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      document.getElementById('cedula').value = '';
+      document.getElementById('searchMaestriaFilter').value = '';
+      document.getElementById('searchTrimestreFilter').value = '';
+      document.getElementById('searchFechaDesde').value = '';
+      document.getElementById('searchFechaHasta').value = '';
+      document.getElementById('results').innerHTML = '';
+    });
   }
 
   // Agregar pago
