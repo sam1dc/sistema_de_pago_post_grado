@@ -60,6 +60,59 @@
     </div>
 
     <div class="box">
+      <h3 class="subtitle is-6 mb-3">
+        <span class="icon-text">
+          <span class="icon has-text-primary">
+            <i class="mdi mdi-cash-multiple"></i>
+          </span>
+          <span>Conversor de Divisas (USD → Bs)</span>
+        </span>
+      </h3>
+      
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Monto en USD</label>
+            <div class="control has-icons-left">
+              <input class="input" type="number" id="montoUSD" placeholder="0.00" step="0.01">
+              <span class="icon is-left">
+                <i class="mdi mdi-currency-usd"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Tasa BCV</label>
+            <div class="field has-addons">
+              <div class="control is-expanded">
+                <input class="input" type="number" id="tasaBCV" placeholder="0.00" step="0.01">
+              </div>
+              <div class="control">
+                <button class="button is-info" id="fetchBCVBtn" title="Obtener tasa actual del BCV">
+                  <span class="icon">
+                    <i class="mdi mdi-refresh"></i>
+                  </span>
+                  <span>Actualizar</span>
+                </button>
+              </div>
+            </div>
+            <p class="help" id="bcvDateHelp"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Equivalente en Bs</label>
+        <div class="control">
+          <input class="input is-static has-text-weight-bold has-text-primary" type="text" id="montoBs" readonly value="Bs 0.00">
+        </div>
+      </div>
+
+      <div id="converterResult" class="mt-3"></div>
+    </div>
+
+    <div class="box">
       <h3 class="subtitle is-6 mb-3">Archivos Excel Encontrados</h3>
       <div id="filesList" class="content"></div>
     </div>

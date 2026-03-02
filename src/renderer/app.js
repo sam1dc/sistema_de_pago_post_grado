@@ -1,6 +1,8 @@
 import { searchStudent } from './modules/search.js';
 import { addPayment, searchStudentForAdd, clearAddForm, calculateDebt } from './modules/addPayment.js';
 import { loadExcelFiles, updateDirectoryDisplay } from './modules/utils.js';
+import { initCurrencyConverter } from './modules/currencyConverter.js';
+import { initPaymentOCR } from './modules/paymentOCR.js';
 
 let selectedDirectory = null;
 
@@ -30,6 +32,12 @@ function setupEventListeners() {
   if (savedCost && costoUCInput) {
     costoUCInput.value = savedCost;
   }
+
+  // Inicializar conversor de divisas
+  initCurrencyConverter();
+
+  // Inicializar OCR de pagos
+  initPaymentOCR();
 
   // Toggle sidebar en móvil
   const hamburgerBtn = document.getElementById('hamburgerBtn');
