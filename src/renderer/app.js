@@ -54,11 +54,11 @@ function setupEventListeners() {
       e.preventDefault();
       const target = item.getAttribute('data-target');
       
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('is-active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('is-active'));
       
       const targetTab = document.getElementById(target);
-      if (targetTab) targetTab.classList.add('is-active');
+      if (targetTab) targetTab.classList.add('active');
       item.classList.add('is-active');
       
       if (window.innerWidth <= 768 && sidebar && overlay) {
@@ -220,6 +220,86 @@ function setupEventListeners() {
       
       const addResults = document.getElementById('addResults');
       if (addResults) addResults.innerHTML = '';
+    }
+    
+    // Botón Pagar Deuda (desde búsqueda por cédula)
+    if (e.target.closest('#btnPagarDeuda')) {
+      const btn = e.target.closest('#btnPagarDeuda');
+      const cedula = btn.dataset.cedula;
+      const nombre = btn.dataset.nombre;
+      const deuda = btn.dataset.deuda;
+      
+      // Cambiar a la vista de agregar pago
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('is-active'));
+      
+      const addTab = document.getElementById('add-tab');
+      if (addTab) addTab.classList.add('active');
+      const addMenuItem = document.querySelector('[data-target="add-tab"]');
+      if (addMenuItem) addMenuItem.classList.add('is-active');
+      
+      // Precargar datos
+      setTimeout(() => {
+        const studentForm = document.getElementById('studentForm');
+        if (studentForm) studentForm.style.display = 'block';
+        
+        const addCedula = document.getElementById('addCedula');
+        if (addCedula) addCedula.value = cedula;
+        
+        const addNombreCompleto = document.getElementById('addNombreCompleto');
+        if (addNombreCompleto) {
+          addNombreCompleto.value = nombre;
+          addNombreCompleto.readOnly = true;
+        }
+        
+        const addTotalPagar = document.getElementById('addTotalPagar');
+        if (addTotalPagar) addTotalPagar.value = parseFloat(deuda).toFixed(2);
+        
+        const addResults = document.getElementById('addResults');
+        if (addResults) {
+          addResults.innerHTML = '<div class="notification is-info"><button class="delete"></button>Complete los datos del pago para saldar la deuda.</div>';
+        }
+      }, 100);
+    }
+    
+    // Botón Pagar (desde tabla de maestría)
+    if (e.target.closest('.btnPagarFila')) {
+      const btn = e.target.closest('.btnPagarFila');
+      const cedula = btn.dataset.cedula;
+      const nombre = btn.dataset.nombre;
+      const deuda = btn.dataset.deuda;
+      
+      // Cambiar a la vista de agregar pago
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(mi => mi.classList.remove('is-active'));
+      
+      const addTab = document.getElementById('add-tab');
+      if (addTab) addTab.classList.add('active');
+      const addMenuItem = document.querySelector('[data-target="add-tab"]');
+      if (addMenuItem) addMenuItem.classList.add('is-active');
+      
+      // Precargar datos
+      setTimeout(() => {
+        const studentForm = document.getElementById('studentForm');
+        if (studentForm) studentForm.style.display = 'block';
+        
+        const addCedula = document.getElementById('addCedula');
+        if (addCedula) addCedula.value = cedula;
+        
+        const addNombreCompleto = document.getElementById('addNombreCompleto');
+        if (addNombreCompleto) {
+          addNombreCompleto.value = nombre;
+          addNombreCompleto.readOnly = true;
+        }
+        
+        const addTotalPagar = document.getElementById('addTotalPagar');
+        if (addTotalPagar) addTotalPagar.value = parseFloat(deuda).toFixed(2);
+        
+        const addResults = document.getElementById('addResults');
+        if (addResults) {
+          addResults.innerHTML = '<div class="notification is-info"><button class="delete"></button>Complete los datos del pago para saldar la deuda.</div>';
+        }
+      }, 100);
     }
   });
 

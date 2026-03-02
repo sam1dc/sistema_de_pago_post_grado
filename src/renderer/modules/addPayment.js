@@ -34,23 +34,28 @@ export async function addPayment(selectedDirectory) {
 
   const uc = parseFloat(document.getElementById('addUC').value) || 0;
   const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
-  const totalAPagar = uc * costoUC;
+  const totalAPagarInput = parseFloat(document.getElementById('addTotalPagar').value) || 0;
+  
+  // Si hay UC y costo, calcular. Si no, usar el valor del input (para pagos de deuda)
+  const totalAPagar = (uc > 0 && costoUC > 0) ? (uc * costoUC) : totalAPagarInput;
+  const abono = parseFloat(document.getElementById('addAbono').value) || 0;
+  const resta = totalAPagar - abono;
 
   const paymentData = {
     cedula: document.getElementById('addCedula').value.trim(),
     nombre_completo: document.getElementById('addNombreCompleto').value.trim(),
     asignatura: document.getElementById('addAsignatura').value.trim(),
-    uc: uc,
-    costo_uc: costoUC,
+    uc: uc || '',
+    costo_uc: costoUC || '',
     total_a_pagar: totalAPagar,
     fecha: document.getElementById('addFecha').value,
-    abono: parseFloat(document.getElementById('addAbono').value) || 0,
-    resta: parseFloat(document.getElementById('addResta').value) || 0,
+    abono: abono,
+    resta: resta >= 0 ? resta : 0,
     observacion: document.getElementById('addObservacion').value.trim()
   };
 
-  if (!paymentData.cedula || !paymentData.nombre_completo) {
-    resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, complete los campos obligatorios (Cédula, Nombre Completo).</div>';
+  if (!paymentData.cedula || !paymentData.nombre_completo || !paymentData.fecha) {
+    resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, complete los campos obligatorios (Cédula, Nombre Completo, Fecha).</div>';
     return;
   }
 

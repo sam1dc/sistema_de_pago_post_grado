@@ -70,6 +70,7 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
             <th>Abono</th>
             <th>Resta</th>
             <th>Observación</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
@@ -86,6 +87,14 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
               <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
               <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
+              <td>
+                ${p.resta > 0 ? `<button class="button is-small is-warning btnPagarFila" data-cedula="${p.cedula}" data-nombre="${p.nombre_completo}" data-deuda="${p.resta}">
+                  <span class="icon is-small">
+                    <i class="mdi mdi-cash"></i>
+                  </span>
+                  <span>Pagar</span>
+                </button>` : '<span class="tag is-success">Pagado</span>'}
+              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -131,6 +140,12 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, results
         </div>
         <div class="column is-12">
           <p class="title is-3 has-text-white mt-2">Deuda Total: $${totalDebt.toFixed(2)}</p>
+          ${totalDebt > 0 ? `<button class="button is-warning is-medium mt-3" id="btnPagarDeuda" data-cedula="${student.cedula}" data-nombre="${student.nombre_completo}" data-deuda="${totalDebt}">
+            <span class="icon">
+              <i class="mdi mdi-cash"></i>
+            </span>
+            <span>Pagar Deuda</span>
+          </button>` : ''}
         </div>
       </div>
     </div>
