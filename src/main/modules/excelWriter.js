@@ -21,7 +21,7 @@ function addPayment(directory, fileName, paymentData, sheetName = null) {
     const worksheet = workbook.Sheets[targetSheetName];
     const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     
-    // Agregar nueva fila de datos
+    // Agregar nueva fila de datos con la deuda actualizada
     const newRow = [
       paymentData.nombre_completo,
       paymentData.cedula,

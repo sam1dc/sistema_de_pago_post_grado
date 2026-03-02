@@ -70,9 +70,15 @@ function searchStudent(directory, cedula) {
     trimestreMap[trim].push(record);
   });
 
-  // Calcular deuda total sumando todas las columnas RESTA
-  let totalDebt = 0;
+  // Calcular deuda total: solo la ÚLTIMA resta de cada archivo/hoja
+  const debtByFileSheet = {};
   studentRecords.forEach(record => {
+    const key = `${record._file}|${record._sheet}`;
+    debtByFileSheet[key] = record; // Sobrescribe, quedando solo el último
+  });
+  
+  let totalDebt = 0;
+  Object.values(debtByFileSheet).forEach(record => {
     totalDebt += Number(record.resta) || 0;
   });
 
@@ -115,7 +121,13 @@ function searchByMaestria(directory, maestria) {
       };
     }
     studentMap[cedula].payments.push(record);
-    studentMap[cedula].totalDebt += Number(record.resta) || 0;
+  });
+  
+  // Calcular deuda: solo la última resta de cada estudiante en esta maestría
+  Object.keys(studentMap).forEach(cedula => {
+    const payments = studentMap[cedula].payments;
+    const lastPayment = payments[payments.length - 1];
+    studentMap[cedula].totalDebt = Number(lastPayment.resta) || 0;
   });
   
   return Object.values(studentMap);

@@ -110,16 +110,19 @@ export async function searchStudentForAdd(selectedDirectory) {
       document.getElementById('addCedula').value = cedula;
       document.getElementById('addNombreCompleto').value = data.student.nombre_completo;
       
-      const costoUC = localStorage.getItem('costoUC');
+      // Autocompletar "Total a Pagar" con la deuda total acumulada
       if (data.totalDebt > 0) {
         document.getElementById('addTotalPagar').value = data.totalDebt.toFixed(2);
-      } else if (costoUC) {
-        document.getElementById('addCostoUC').value = parseFloat(costoUC).toFixed(2);
+        addResults.innerHTML = `<div class="notification is-info"><button class="delete"></button>Estudiante encontrado. Deuda total acumulada: $${data.totalDebt.toFixed(2)}</div>`;
+      } else {
+        const costoUC = localStorage.getItem('costoUC');
+        if (costoUC) {
+          document.getElementById('addCostoUC').value = parseFloat(costoUC).toFixed(2);
+        }
+        addResults.innerHTML = '<div class="notification is-success"><button class="delete"></button>Estudiante encontrado. No tiene deudas pendientes.</div>';
       }
       
       document.getElementById('addNombreCompleto').readOnly = true;
-      
-      addResults.innerHTML = '<div class="notification is-success"><button class="delete"></button>Estudiante encontrado. Datos autocompletados.</div>';
     } else {
       addResults.innerHTML = `
         <div class="notification is-warning">
