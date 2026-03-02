@@ -91,7 +91,54 @@ XLSX.utils.book_append_sheet(wb, ws5, 'MAESTRIA EN ING. MECÁNICA ');
 
 XLSX.writeFile(wb, path.join(dataDir, 'CONTROL DE PAGOS DEL TRIMESTRE 2026-1.xlsx'));
 
-console.log('✓ Archivo Excel de prueba creado en:', dataDir);
+// Datos para trimestre 2026-2
+const electrica2 = [
+  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '15/07/2026', abono: 105, resta: '', observacion: 'REF 9021' },
+  { nombre_completo: 'MARÍA GONZÁLEZ', cedula: '87654321', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '20/07/2026', abono: 50, resta: 55, observacion: 'REF 9022' }
+];
+
+const industrial2 = [
+  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '18/07/2026', abono: 105, resta: '', observacion: 'REF 9023' },
+  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '22/07/2026', abono: 100, resta: 110, observacion: 'REF 9024' }
+];
+
+const electronica2 = [
+  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '19/07/2026', abono: 70, resta: 35, observacion: 'REF 9025' },
+  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '21/07/2026', abono: 105, resta: '', observacion: 'REF 9026' }
+];
+
+const metalurgica2 = [
+  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '23/07/2026', abono: 210, resta: '', observacion: 'REF 9027' },
+  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '24/07/2026', abono: 40, resta: 65, observacion: 'REF 9028' }
+];
+
+const mecanica2 = [
+  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '25/07/2026', abono: 105, resta: '', observacion: 'REF 9029' },
+  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '26/07/2026', abono: 80, resta: 25, observacion: 'REF 9030' }
+];
+
+// Crear segundo archivo Excel
+const wb2 = XLSX.utils.book_new();
+
+const ws2_1 = createExcelWithStructure(electrica2, '2026-2', 'MAESTRÍA EN ING. ELÉCTRICA');
+XLSX.utils.book_append_sheet(wb2, ws2_1, 'MAESTRIA EN ING. ELÉCTRICA ');
+
+const ws2_2 = createExcelWithStructure(industrial2, '2026-2', 'MAESTRÍA EN ING. INDUSTRIAL');
+XLSX.utils.book_append_sheet(wb2, ws2_2, 'MAESTRIA EN ING. INDUSTRIAL');
+
+const ws2_3 = createExcelWithStructure(electronica2, '2026-2', 'MAESTRÍA EN ING. ELECTRÓNICA');
+XLSX.utils.book_append_sheet(wb2, ws2_3, 'MAESTRIA EN ING. ELECTRÓNICA ');
+
+const ws2_4 = createExcelWithStructure(metalurgica2, '2026-2', 'MAESTRÍA EN ING. METALÚRGICA');
+XLSX.utils.book_append_sheet(wb2, ws2_4, 'MAESTRIA EN ING. METALÚRGICA ');
+
+const ws2_5 = createExcelWithStructure(mecanica2, '2026-2', 'MAESTRÍA EN ING. MECÁNICA');
+XLSX.utils.book_append_sheet(wb2, ws2_5, 'MAESTRIA EN ING. MECÁNICA ');
+
+XLSX.writeFile(wb2, path.join(dataDir, 'CONTROL DE PAGOS DEL TRIMESTRE 2026-2.xlsx'));
+
+console.log('✓ Archivos Excel de prueba creados en:', dataDir);
+console.log('\n=== TRIMESTRE 2026-1 ===');
 console.log('\nCédulas de prueba por maestría:\n');
 console.log('INGENIERÍA ELÉCTRICA:');
 console.log('  - 12345678 (Juan Pérez) - Debe: $0');
@@ -108,3 +155,20 @@ console.log('  - 66778899 (Laura Torres) - Debe: $0');
 console.log('\nINGENIERÍA MECÁNICA:');
 console.log('  - 33445566 (Diego Morales) - Debe: $60');
 console.log('  - 77889900 (Valentina Cruz) - Debe: $0');
+console.log('\n=== TRIMESTRE 2026-2 ===');
+console.log('\nINGENIERÍA ELÉCTRICA:');
+console.log('  - 12345678 (Juan Pérez) - Debe: $0');
+console.log('  - 87654321 (María González) - Debe: $55');
+console.log('\nINGENIERÍA INDUSTRIAL:');
+console.log('  - 11223344 (Carlos Rodríguez) - Debe: $0');
+console.log('  - 55667788 (Ana Martínez) - Debe: $110');
+console.log('\nINGENIERÍA ELECTRÓNICA:');
+console.log('  - 99887766 (Luis Fernández) - Debe: $35');
+console.log('  - 44556677 (Sofía Ramírez) - Debe: $0');
+console.log('\nINGENIERÍA METALÚRGICA:');
+console.log('  - 22334455 (Pedro Sánchez) - Debe: $0');
+console.log('  - 66778899 (Laura Torres) - Debe: $65');
+console.log('\nINGENIERÍA MECÁNICA:');
+console.log('  - 33445566 (Diego Morales) - Debe: $0');
+console.log('  - 77889900 (Valentina Cruz) - Debe: $25');
+

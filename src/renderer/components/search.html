@@ -10,12 +10,23 @@
     </h2>
     
     <div class="field">
-      <label class="label">Cédula del Alumno</label>
+      <label class="label">Cédula del Alumno (Opcional)</label>
       <div class="control has-icons-left">
-        <input class="input" type="text" id="cedula" placeholder="Ingrese la cédula">
+        <input class="input" type="text" id="cedula" placeholder="Ingrese la cédula o deje vacío para ver todos">
         <span class="icon is-left">
           <i class="mdi mdi-card-account-details"></i>
         </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Filtrar por Maestría</label>
+      <div class="control">
+        <div class="select is-fullwidth">
+          <select id="searchMaestriaFilter">
+            <option value="">Seleccione una maestría</option>
+          </select>
+        </div>
       </div>
     </div>
 

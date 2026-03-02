@@ -97,9 +97,34 @@ function getSheetNames(directory, fileName) {
   return workbook.SheetNames;
 }
 
+function searchByMaestria(directory, maestria) {
+  const allRecords = readExcelFiles(directory);
+  const maestriaRecords = allRecords.filter(r => r._sheet === maestria);
+  
+  if (maestriaRecords.length === 0) return null;
+  
+  // Agrupar por estudiante
+  const studentMap = {};
+  maestriaRecords.forEach(record => {
+    const cedula = record.cedula;
+    if (!studentMap[cedula]) {
+      studentMap[cedula] = {
+        student: record,
+        payments: [],
+        totalDebt: 0
+      };
+    }
+    studentMap[cedula].payments.push(record);
+    studentMap[cedula].totalDebt += Number(record.resta) || 0;
+  });
+  
+  return Object.values(studentMap);
+}
+
 module.exports = {
   readExcelFiles,
   searchStudent,
   getExcelFiles,
-  getSheetNames
+  getSheetNames,
+  searchByMaestria
 };

@@ -45,6 +45,14 @@ ipcMain.handle('search-student', async (event, { directory, cedula }) => {
   }
 });
 
+ipcMain.handle('search-by-maestria', async (event, { directory, maestria }) => {
+  try {
+    return excelReader.searchByMaestria(directory, maestria);
+  } catch (error) {
+    throw new Error(`Error al buscar por maestría: ${error.message}`);
+  }
+});
+
 ipcMain.handle('get-excel-files', async (event, directory) => {
   try {
     return excelReader.getExcelFiles(directory);
