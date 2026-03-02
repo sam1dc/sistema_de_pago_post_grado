@@ -268,20 +268,11 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
     return;
   }
   
-  // Recalcular deuda y trimestres según filtros
-  const debtByFileSheet = {};
-  payments.forEach(record => {
-    const key = `${record._file}|${record._sheet}`;
-    debtByFileSheet[key] = record;
-  });
-  
-  totalDebt = 0;
-  Object.values(debtByFileSheet).forEach(record => {
-    totalDebt += Number(record.resta) || 0;
-  });
-  
+  // Recalcular trimestres según filtros
   const trimestresSet = new Set(payments.map(p => p.trimestre));
   trimestres = trimestresSet.size;
+  
+  // totalDebt ya viene calculado correctamente del backend (suma TOTAL_A_PAGAR - suma ABONO)
 
   const html = `
     <div class="box summary-box mt-5">

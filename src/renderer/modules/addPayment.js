@@ -32,19 +32,35 @@ export async function addPayment(selectedDirectory) {
     }
   }
 
+  const cedula = document.getElementById('addCedula').value.trim();
   const uc = parseFloat(document.getElementById('addUC').value) || 0;
   const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
-  const totalAPagarInput = parseFloat(document.getElementById('addTotalPagar').value) || 0;
-  
-  // Si hay UC y costo, calcular. Si no, usar el valor del input (para pagos de deuda)
-  const totalAPagar = (uc > 0 && costoUC > 0) ? (uc * costoUC) : totalAPagarInput;
   const abono = parseFloat(document.getElementById('addAbono').value) || 0;
-  const resta = totalAPagar - abono;
+  
+  // Calcular nuevo cargo por UC
+  const nuevoCargoUC = uc * costoUC;
+  
+  // TOTAL A PAGAR = solo el nuevo cargo (no incluye deuda anterior)
+  const totalAPagar = nuevoCargoUC;
+  
+  // Obtener deuda acumulada para calcular RESTA
+  let deudaAcumulada = 0;
+  try {
+    const studentData = await window.electronAPI.searchStudent(selectedDirectory, cedula);
+    if (studentData) {
+      deudaAcumulada = studentData.totalDebt || 0;
+    }
+  } catch (error) {
+    console.error('Error al obtener deuda acumulada:', error);
+  }
+  
+  // RESTA = deuda anterior + nuevo cargo - abono
+  const resta = (deudaAcumulada + totalAPagar) - abono;
 
   const paymentData = {
-    cedula: document.getElementById('addCedula').value.trim(),
+    cedula: cedula,
     nombre_completo: document.getElementById('addNombreCompleto').value.trim(),
-    asignatura: document.getElementById('addAsignatura').value.trim(),
+    asignatura: document.getElementById('addAsignatura').value.trim() || 'ABONO',
     uc: uc || '',
     costo_uc: costoUC || '',
     total_a_pagar: totalAPagar,
@@ -110,10 +126,10 @@ export async function searchStudentForAdd(selectedDirectory) {
       document.getElementById('addCedula').value = cedula;
       document.getElementById('addNombreCompleto').value = data.student.nombre_completo;
       
-      // Autocompletar "Total a Pagar" con la deuda total acumulada
+      // Mostrar deuda total pero NO autocompletar Total a Pagar
+      // El usuario debe seleccionar archivo/maestría primero
       if (data.totalDebt > 0) {
-        document.getElementById('addTotalPagar').value = data.totalDebt.toFixed(2);
-        addResults.innerHTML = `<div class="notification is-info"><button class="delete"></button>Estudiante encontrado. Deuda total acumulada: $${data.totalDebt.toFixed(2)}</div>`;
+        addResults.innerHTML = `<div class="notification is-info"><button class="delete"></button>Estudiante encontrado. Deuda total acumulada: $${data.totalDebt.toFixed(2)}. Seleccione el archivo y maestría para ver la deuda específica.</div>`;
       } else {
         const costoUC = localStorage.getItem('costoUC');
         if (costoUC) {
@@ -152,9 +168,31 @@ export function clearAddForm() {
   document.getElementById('addNombreCompleto').readOnly = false;
 }
 
-export function calculateDebt() {
-  const totalPagar = parseFloat(document.getElementById('addTotalPagar').value) || 0;
+export async function calculateDebt(selectedDirectory) {
+  const cedula = document.getElementById('addCedula').value.trim();
+  const uc = parseFloat(document.getElementById('addUC').value) || 0;
+  const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
   const abono = parseFloat(document.getElementById('addAbono').value) || 0;
-  const resta = totalPagar - abono;
+  
+  let deudaAcumulada = 0;
+  
+  if (cedula && selectedDirectory) {
+    try {
+      const studentData = await window.electronAPI.searchStudent(selectedDirectory, cedula);
+      if (studentData) {
+        deudaAcumulada = studentData.totalDebt || 0;
+      }
+    } catch (error) {
+      console.error('Error al obtener deuda:', error);
+    }
+  }
+  
+  // TOTAL A PAGAR = solo nuevo cargo (UC × Costo UC)
+  const nuevoCargoUC = uc * costoUC;
+  
+  // RESTA = deuda acumulada + nuevo cargo - abono
+  const resta = (deudaAcumulada + nuevoCargoUC) - abono;
+  
+  document.getElementById('addTotalPagar').value = nuevoCargoUC.toFixed(2);
   document.getElementById('addResta').value = resta >= 0 ? resta.toFixed(2) : 0;
 }

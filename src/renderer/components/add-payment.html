@@ -57,6 +57,10 @@
 
       <h3 class="subtitle is-6 mb-4 mt-5">Detalles del Pago</h3>
 
+      <div class="notification is-info is-light" id="deudaActualInfo" style="display: none;">
+        <strong>Deuda Actual:</strong> $<span id="deudaActualMonto">0.00</span>
+      </div>
+
       <div class="columns">
         <div class="column">
           <div class="field">
@@ -101,7 +105,7 @@
       <div class="columns">
         <div class="column">
           <div class="field">
-            <label class="label">Total a Pagar</label>
+            <label class="label">Total a Pagar <small class="has-text-grey">(Deuda + Nuevos Cargos)</small></label>
             <div class="control has-icons-left">
               <input class="input" type="number" id="addTotalPagar" placeholder="0.00" step="0.01" readonly>
               <span class="icon is-left">
@@ -124,7 +128,7 @@
       </div>
 
       <div class="field">
-        <label class="label">Resta</label>
+        <label class="label">Resta <small class="has-text-grey">(Nueva Deuda)</small></label>
         <div class="control has-icons-left">
           <input class="input" type="number" id="addResta" placeholder="0.00" step="0.01" readonly>
           <span class="icon is-left">

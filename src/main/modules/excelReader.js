@@ -70,24 +70,27 @@ function searchStudent(directory, cedula) {
     trimestreMap[trim].push(record);
   });
 
-  // Calcular deuda total: solo la ÚLTIMA resta de cada archivo/hoja
-  const debtByFileSheet = {};
+  // Calcular deuda total: suma de todos los TOTAL_A_PAGAR - suma de todos los ABONO
+  let totalAPagar = 0;
+  let totalAbonado = 0;
+  
   studentRecords.forEach(record => {
-    const key = `${record._file}|${record._sheet}`;
-    debtByFileSheet[key] = record; // Sobrescribe, quedando solo el último
+    const toPagar = Number(record.total_a_pagar) || 0;
+    const abono = Number(record.abono) || 0;
+    totalAPagar += toPagar;
+    totalAbonado += abono;
+    console.log(`Registro: TOTAL_A_PAGAR=${toPagar}, ABONO=${abono}, Archivo=${record._file}, Hoja=${record._sheet}`);
   });
   
-  let totalDebt = 0;
-  Object.values(debtByFileSheet).forEach(record => {
-    totalDebt += Number(record.resta) || 0;
-  });
+  const totalDebt = totalAPagar - totalAbonado;
+  console.log(`DEUDA TOTAL: ${totalAPagar} - ${totalAbonado} = ${totalDebt}`);
 
   const trimestres = Object.keys(trimestreMap).length;
 
   return {
     student: studentRecords[0],
     payments: studentRecords,
-    totalDebt,
+    totalDebt: totalDebt >= 0 ? totalDebt : 0,
     trimestres
   };
 }
@@ -133,10 +136,48 @@ function searchByMaestria(directory, maestria) {
   return Object.values(studentMap);
 }
 
+function getLastDebtInSheet(directory, fileName, sheetName, cedula) {
+  const filePath = path.join(directory, fileName);
+  if (!fs.existsSync(filePath)) return 0;
+  
+  const workbook = XLSX.readFile(filePath);
+  if (!workbook.Sheets[sheetName]) return 0;
+  
+  const sheet = workbook.Sheets[sheetName];
+  const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  
+  // Buscar última fila del estudiante (desde fila 2 en adelante)
+  let lastResta = 0;
+  for (let i = rawData.length - 1; i >= 2; i--) {
+    const row = rawData[i];
+    if (String(row[1]) === String(cedula)) {
+      lastResta = Number(row[8]) || 0; // Columna 8 = Resta
+      break;
+    }
+  }
+  
+  return lastResta;
+}
+
+function getLastFileAndSheet(directory, cedula) {
+  const allRecords = readExcelFiles(directory);
+  const studentRecords = allRecords.filter(r => String(r.cedula) === String(cedula));
+  
+  if (studentRecords.length === 0) return null;
+  
+  const lastRecord = studentRecords[studentRecords.length - 1];
+  return {
+    file: lastRecord._file,
+    sheet: lastRecord._sheet
+  };
+}
+
 module.exports = {
   readExcelFiles,
   searchStudent,
   getExcelFiles,
   getSheetNames,
-  searchByMaestria
+  searchByMaestria,
+  getLastDebtInSheet,
+  getLastFileAndSheet
 };

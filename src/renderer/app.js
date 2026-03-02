@@ -162,6 +162,20 @@ function setupEventListeners() {
     });
   }
 
+  // Actualizar Total a Pagar cuando se selecciona una maestría
+  const sheetSelect = document.getElementById('sheetSelect');
+  if (sheetSelect) {
+    sheetSelect.addEventListener('change', async (e) => {
+      const sheetName = e.target.value;
+      const fileName = document.getElementById('fileSelect').value;
+      const cedula = document.getElementById('addCedula').value.trim();
+      
+      if (sheetName && fileName && cedula && selectedDirectory) {
+        calculateDebt(selectedDirectory);
+      }
+    });
+  }
+
   // Calcular Total a Pagar automáticamente
   const addUC = document.getElementById('addUC');
   const addCostoUC = document.getElementById('addCostoUC');
@@ -173,7 +187,7 @@ function setupEventListeners() {
       const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
       const totalPagar = document.getElementById('addTotalPagar');
       if (totalPagar) totalPagar.value = (uc * costoUC).toFixed(2);
-      calculateDebt();
+      calculateDebt(selectedDirectory);
     });
   }
   
@@ -183,12 +197,12 @@ function setupEventListeners() {
       const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
       const totalPagar = document.getElementById('addTotalPagar');
       if (totalPagar) totalPagar.value = (uc * costoUC).toFixed(2);
-      calculateDebt();
+      calculateDebt(selectedDirectory);
     });
   }
 
   if (addAbono) {
-    addAbono.addEventListener('input', calculateDebt);
+    addAbono.addEventListener('input', () => calculateDebt(selectedDirectory));
   }
 
   // Buscar estudiante para autocompletar
@@ -239,7 +253,7 @@ function setupEventListeners() {
       if (addMenuItem) addMenuItem.classList.add('is-active');
       
       // Precargar datos
-      setTimeout(() => {
+      setTimeout(async () => {
         const studentForm = document.getElementById('studentForm');
         if (studentForm) studentForm.style.display = 'block';
         
@@ -252,12 +266,59 @@ function setupEventListeners() {
           addNombreCompleto.readOnly = true;
         }
         
+        // Mostrar deuda actual
+        const deudaActualInfo = document.getElementById('deudaActualInfo');
+        const deudaActualMonto = document.getElementById('deudaActualMonto');
+        if (deudaActualInfo && deudaActualMonto) {
+          deudaActualMonto.textContent = parseFloat(deuda).toFixed(2);
+          deudaActualInfo.style.display = 'block';
+        }
+        
+        // Mostrar deuda en Total a Pagar para referencia
         const addTotalPagar = document.getElementById('addTotalPagar');
         if (addTotalPagar) addTotalPagar.value = parseFloat(deuda).toFixed(2);
         
+        const addResta = document.getElementById('addResta');
+        if (addResta) addResta.value = parseFloat(deuda).toFixed(2);
+        
+        // Obtener último archivo y maestría del estudiante
+        try {
+          const lastInfo = await window.electronAPI.getLastFileAndSheet(selectedDirectory, cedula);
+          if (lastInfo) {
+            const fileSelect = document.getElementById('fileSelect');
+            const createNewFile = document.getElementById('createNewFile');
+            
+            if (fileSelect && createNewFile) {
+              createNewFile.checked = false;
+              fileSelect.disabled = false;
+              fileSelect.value = lastInfo.file;
+              
+              // Cargar hojas del archivo
+              const sheets = await window.electronAPI.getSheetNames(selectedDirectory, lastInfo.file);
+              const sheetSelect = document.getElementById('sheetSelect');
+              const sheetSelectField = document.getElementById('sheetSelectField');
+              
+              if (sheetSelect) {
+                sheetSelect.innerHTML = '<option value="">Seleccione una maestría</option>';
+                sheets.forEach(sheet => {
+                  const option = document.createElement('option');
+                  option.value = sheet;
+                  option.textContent = sheet;
+                  sheetSelect.appendChild(option);
+                });
+                sheetSelect.value = lastInfo.sheet;
+              }
+              
+              if (sheetSelectField) sheetSelectField.style.display = 'block';
+            }
+          }
+        } catch (error) {
+          console.error('Error al obtener último archivo:', error);
+        }
+        
         const addResults = document.getElementById('addResults');
         if (addResults) {
-          addResults.innerHTML = '<div class="notification is-info"><button class="delete"></button>Complete los datos del pago para saldar la deuda.</div>';
+          addResults.innerHTML = '<div class="notification is-info"><button class="delete"></button>Complete los datos del pago. Puede agregar nuevos cargos (UC) o solo registrar un abono.</div>';
         }
       }, 100);
     }

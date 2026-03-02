@@ -33,42 +33,43 @@ function createExcelWithStructure(data, trimestre, maestria) {
 
 // Datos de prueba - MAESTRÍA EN INGENIERÍA ELÉCTRICA
 const electrica = [
-  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '07/01/2026', abono: 8, resta: '', observacion: 'REF 9001 TASA' },
-  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '15/01/2026', abono: 105, resta: '', observacion: 'REF 9002' },
-  { nombre_completo: 'MARÍA GONZÁLEZ', cedula: '87654321', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '10/01/2026', abono: 8, resta: '', observacion: 'REF 9003 TASA' },
+  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '07/01/2026', abono: 8, resta: 0, observacion: 'REF 9001 TASA' },
+  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '15/01/2026', abono: 50, resta: 55, observacion: 'REF 9002' },
+  { nombre_completo: 'MARÍA GONZÁLEZ', cedula: '87654321', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '10/01/2026', abono: 8, resta: 0, observacion: 'REF 9003 TASA' },
   { nombre_completo: 'MARÍA GONZÁLEZ', cedula: '87654321', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '20/01/2026', abono: 100, resta: 110, observacion: 'REF 9004' }
 ];
 
 // Datos de prueba - MAESTRÍA EN INGENIERÍA INDUSTRIAL
 const industrial = [
-  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '08/01/2026', abono: 8, resta: '', observacion: 'REF 9005 TASA' },
-  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '18/01/2026', abono: 105, resta: '', observacion: 'REF 9006' },
-  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '12/01/2026', abono: 8, resta: '', observacion: 'REF 9007 TASA' },
-  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '22/01/2026', abono: 50, resta: 55, observacion: 'REF 9008' }
+  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '08/01/2026', abono: 8, resta: 0, observacion: 'REF 9005 TASA' },
+  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '18/01/2026', abono: 105, resta: 0, observacion: 'REF 9006' },
+  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '12/01/2026', abono: 8, resta: 0, observacion: 'REF 9007 TASA' },
+  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '22/01/2026', abono: 50, resta: 55, observacion: 'REF 9008' },
+  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '25/01/2026', abono: 30, resta: 75, observacion: 'REF 9009 - Pago en otra maestría' }
 ];
 
 // Datos de prueba - MAESTRÍA EN INGENIERÍA ELECTRÓNICA
 const electronica = [
-  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '09/01/2026', abono: 8, resta: '', observacion: 'REF 9009 TASA' },
-  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '19/01/2026', abono: 210, resta: '', observacion: 'REF 9010' },
-  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '11/01/2026', abono: 8, resta: '', observacion: 'REF 9011 TASA' },
-  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '21/01/2026', abono: 70, resta: 35, observacion: 'REF 9012' }
+  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '09/01/2026', abono: 8, resta: 0, observacion: 'REF 9010 TASA' },
+  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '19/01/2026', abono: 210, resta: 0, observacion: 'REF 9011' },
+  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '11/01/2026', abono: 8, resta: 0, observacion: 'REF 9012 TASA' },
+  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '21/01/2026', abono: 70, resta: 35, observacion: 'REF 9013' }
 ];
 
 // Datos de prueba - MAESTRÍA EN INGENIERÍA METALÚRGICA
 const metalurgica = [
-  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '13/01/2026', abono: 8, resta: '', observacion: 'REF 9013 TASA' },
-  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '23/01/2026', abono: 35, resta: 70, observacion: 'REF 9014' },
-  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '14/01/2026', abono: 8, resta: '', observacion: 'REF 9015 TASA' },
-  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '24/01/2026', abono: 105, resta: '', observacion: 'REF 9016' }
+  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '13/01/2026', abono: 8, resta: 0, observacion: 'REF 9014 TASA' },
+  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '23/01/2026', abono: 35, resta: 70, observacion: 'REF 9015' },
+  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '14/01/2026', abono: 8, resta: 0, observacion: 'REF 9016 TASA' },
+  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'INSCRIPCIÓN', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '24/01/2026', abono: 105, resta: 0, observacion: 'REF 9017' }
 ];
 
 // Datos de prueba - MAESTRÍA EN INGENIERÍA MECÁNICA
 const mecanica = [
-  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '15/01/2026', abono: 8, resta: '', observacion: 'REF 9017 TASA' },
-  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '25/01/2026', abono: 150, resta: 60, observacion: 'REF 9018' },
-  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '16/01/2026', abono: 8, resta: '', observacion: 'REF 9019 TASA' },
-  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '26/01/2026', abono: 105, resta: '', observacion: 'REF 9020' }
+  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '15/01/2026', abono: 8, resta: 0, observacion: 'REF 9018 TASA' },
+  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '25/01/2026', abono: 150, resta: 60, observacion: 'REF 9019' },
+  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'PREINSCRIPCIÓN', uc: '', costo_uc: '', total_a_pagar: 8, fecha: '16/01/2026', abono: 8, resta: 0, observacion: 'REF 9020 TASA' },
+  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '26/01/2026', abono: 105, resta: 0, observacion: 'REF 9021' }
 ];
 
 // Crear archivo Excel con múltiples hojas
@@ -93,28 +94,28 @@ XLSX.writeFile(wb, path.join(dataDir, 'CONTROL DE PAGOS DEL TRIMESTRE 2026-1.xls
 
 // Datos para trimestre 2026-2
 const electrica2 = [
-  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '15/07/2026', abono: 105, resta: '', observacion: 'REF 9021' },
-  { nombre_completo: 'MARÍA GONZÁLEZ', cedula: '87654321', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '20/07/2026', abono: 50, resta: 55, observacion: 'REF 9022' }
+  { nombre_completo: 'JUAN PÉREZ', cedula: '12345678', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '15/07/2026', abono: 20, resta: 85, observacion: 'REF 9022' },
+  { nombre_completo: 'MARÍA GONZÁLEZ', cedula: '87654321', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '20/07/2026', abono: 50, resta: 55, observacion: 'REF 9023' }
 ];
 
 const industrial2 = [
-  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '18/07/2026', abono: 105, resta: '', observacion: 'REF 9023' },
-  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '22/07/2026', abono: 100, resta: 110, observacion: 'REF 9024' }
+  { nombre_completo: 'CARLOS RODRÍGUEZ', cedula: '11223344', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '18/07/2026', abono: 105, resta: 0, observacion: 'REF 9024' },
+  { nombre_completo: 'ANA MARTÍNEZ', cedula: '55667788', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '22/07/2026', abono: 100, resta: 110, observacion: 'REF 9025' }
 ];
 
 const electronica2 = [
-  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '19/07/2026', abono: 70, resta: 35, observacion: 'REF 9025' },
-  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '21/07/2026', abono: 105, resta: '', observacion: 'REF 9026' }
+  { nombre_completo: 'LUIS FERNÁNDEZ', cedula: '99887766', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '19/07/2026', abono: 70, resta: 35, observacion: 'REF 9026' },
+  { nombre_completo: 'SOFÍA RAMÍREZ', cedula: '44556677', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '21/07/2026', abono: 60, resta: 45, observacion: 'REF 9027' }
 ];
 
 const metalurgica2 = [
-  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '23/07/2026', abono: 210, resta: '', observacion: 'REF 9027' },
-  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '24/07/2026', abono: 40, resta: 65, observacion: 'REF 9028' }
+  { nombre_completo: 'PEDRO SÁNCHEZ', cedula: '22334455', asignatura: '2 ASIGNATURAS', uc: 6, costo_uc: 35, total_a_pagar: 210, fecha: '23/07/2026', abono: 210, resta: 0, observacion: 'REF 9028' },
+  { nombre_completo: 'LAURA TORRES', cedula: '66778899', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '24/07/2026', abono: 40, resta: 65, observacion: 'REF 9029' }
 ];
 
 const mecanica2 = [
-  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '25/07/2026', abono: 105, resta: '', observacion: 'REF 9029' },
-  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '26/07/2026', abono: 80, resta: 25, observacion: 'REF 9030' }
+  { nombre_completo: 'DIEGO MORALES', cedula: '33445566', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '25/07/2026', abono: 105, resta: 0, observacion: 'REF 9030' },
+  { nombre_completo: 'VALENTINA CRUZ', cedula: '77889900', asignatura: 'UC', uc: 3, costo_uc: 35, total_a_pagar: 105, fecha: '26/07/2026', abono: 80, resta: 25, observacion: 'REF 9031' }
 ];
 
 // Crear segundo archivo Excel
@@ -139,18 +140,29 @@ XLSX.writeFile(wb2, path.join(dataDir, 'CONTROL DE PAGOS DEL TRIMESTRE 2026-2.xl
 
 console.log('✓ Archivos Excel de prueba creados en:', dataDir);
 console.log('\n=== CÉDULAS DE PRUEBA ===\n');
-console.log('Estudiantes con deudas en MÚLTIPLES SEMESTRES:');
-console.log('  - 87654321 (María González) - Deuda 2026-1: $110 + Deuda 2026-2: $55 = TOTAL: $165');
-console.log('  - 55667788 (Ana Martínez) - Deuda 2026-1: $55 + Deuda 2026-2: $110 = TOTAL: $165');
-console.log('  - 66778899 (Laura Torres) - Deuda 2026-1: $0 + Deuda 2026-2: $65 = TOTAL: $65');
-console.log('\nEstudiantes con deuda en UN SOLO SEMESTRE:');
-console.log('  - 44556677 (Sofía Ramírez) - Deuda 2026-1: $35');
-console.log('  - 99887766 (Luis Fernández) - Deuda 2026-2: $35');
-console.log('  - 22334455 (Pedro Sánchez) - Deuda 2026-1: $70');
-console.log('  - 33445566 (Diego Morales) - Deuda 2026-1: $60');
-console.log('  - 77889900 (Valentina Cruz) - Deuda 2026-2: $25');
-console.log('\nEstudiantes SIN DEUDA:');
-console.log('  - 12345678 (Juan Pérez)');
-console.log('  - 11223344 (Carlos Rodríguez)');
-console.log('\n💡 Prueba con 87654321 o 55667788 para ver cómo se actualiza la deuda en ambos semestres!');
+console.log('📊 JUAN PÉREZ (12345678):');
+console.log('   - ING. ELÉCTRICA 2026-1: $55');
+console.log('   - ING. INDUSTRIAL 2026-1: $75');
+console.log('   - ING. ELÉCTRICA 2026-2: $85');
+console.log('   💰 DEUDA TOTAL: $215 (en 3 registros diferentes)\n');
+console.log('📊 MARÍA GONZÁLEZ (87654321):');
+console.log('   - ING. ELÉCTRICA 2026-1: $110');
+console.log('   - ING. ELÉCTRICA 2026-2: $55');
+console.log('   💰 DEUDA TOTAL: $165\n');
+console.log('📊 ANA MARTÍNEZ (55667788):');
+console.log('   - ING. INDUSTRIAL 2026-1: $55');
+console.log('   - ING. INDUSTRIAL 2026-2: $110');
+console.log('   💰 DEUDA TOTAL: $165\n');
+console.log('📊 SOFÍA RAMÍREZ (44556677):');
+console.log('   - ING. ELECTRÓNICA 2026-1: $35');
+console.log('   - ING. ELECTRÓNICA 2026-2: $45');
+console.log('   💰 DEUDA TOTAL: $80\n');
+console.log('📊 LAURA TORRES (66778899):');
+console.log('   - ING. METALÚRGICA 2026-2: $65');
+console.log('   💰 DEUDA TOTAL: $65\n');
+console.log('📊 ESTUDIANTES SIN DEUDA:');
+console.log('   - CARLOS RODRÍGUEZ (11223344)');
+console.log('   - LUIS FERNÁNDEZ (99887766) - Solo en 2026-1');
+console.log('   - VALENTINA CRUZ (77889900) - Solo en 2026-1\n');
+console.log('💡 Prueba con 12345678 (Juan Pérez) para ver deuda acumulada en múltiples maestrías y trimestres!');
 

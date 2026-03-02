@@ -84,3 +84,19 @@ ipcMain.handle('create-new-file', async (event, { directory, fileName }) => {
     throw new Error(`Error al crear archivo: ${error.message}`);
   }
 });
+
+ipcMain.handle('get-last-debt-in-sheet', async (event, { directory, fileName, sheetName, cedula }) => {
+  try {
+    return excelReader.getLastDebtInSheet(directory, fileName, sheetName, cedula);
+  } catch (error) {
+    throw new Error(`Error al obtener deuda: ${error.message}`);
+  }
+});
+
+ipcMain.handle('get-last-file-and-sheet', async (event, { directory, cedula }) => {
+  try {
+    return excelReader.getLastFileAndSheet(directory, cedula);
+  } catch (error) {
+    throw new Error(`Error al obtener último archivo: ${error.message}`);
+  }
+});
