@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   searchStudent: (directory, cedula) => ipcRenderer.invoke('search-student', { directory, cedula }),
   getExcelFiles: (directory) => ipcRenderer.invoke('get-excel-files', directory),
-  addPayment: (directory, fileName, paymentData) => ipcRenderer.invoke('add-payment', { directory, fileName, paymentData }),
+  getSheetNames: (directory, fileName) => ipcRenderer.invoke('get-sheet-names', { directory, fileName }),
+  addPayment: (directory, fileName, paymentData, sheetName) => ipcRenderer.invoke('add-payment', { directory, fileName, paymentData, sheetName }),
   createNewFile: (directory, fileName) => ipcRenderer.invoke('create-new-file', { directory, fileName })
 });

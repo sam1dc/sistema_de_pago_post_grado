@@ -15,15 +15,17 @@ function setupEventListeners() {
   const savedDir = localStorage.getItem('excelDirectory');
   if (savedDir) {
     selectedDirectory = savedDir;
-    document.getElementById('initialModal').classList.remove('is-active');
+    const initialModal = document.getElementById('initialModal');
+    if (initialModal) initialModal.classList.remove('is-active');
     updateDirectoryDisplay();
     loadExcelFiles();
   }
 
   // Cargar costo guardado
-  const savedCost = localStorage.getItem('semesterCost');
-  if (savedCost) {
-    document.getElementById('semesterCost').value = savedCost;
+  const savedCost = localStorage.getItem('costoUC');
+  const costoUCInput = document.getElementById('costoUC');
+  if (savedCost && costoUCInput) {
+    costoUCInput.value = savedCost;
   }
 
   // Toggle sidebar en móvil
@@ -85,15 +87,15 @@ function setupEventListeners() {
     }
   });
 
-  // Guardar costo por semestre
+  // Guardar costo por UC
   document.getElementById('saveCostBtn').addEventListener('click', () => {
-    const cost = document.getElementById('semesterCost').value;
+    const cost = document.getElementById('costoUC').value;
     if (!cost || parseFloat(cost) <= 0) {
       document.getElementById('costResult').innerHTML = '<div class="notification is-danger"><button class="delete"></button>Ingresa un monto válido.</div>';
       return;
     }
-    localStorage.setItem('semesterCost', cost);
-    document.getElementById('costResult').innerHTML = '<div class="notification is-success"><button class="delete"></button>Costo guardado: $' + parseFloat(cost).toFixed(2) + '</div>';
+    localStorage.setItem('costoUC', cost);
+    document.getElementById('costResult').innerHTML = '<div class="notification is-success"><button class="delete"></button>Costo por U.C guardado: $' + parseFloat(cost).toFixed(2) + '</div>';
     setTimeout(() => {
       document.getElementById('costResult').innerHTML = '';
     }, 3000);
@@ -103,18 +105,59 @@ function setupEventListeners() {
   document.getElementById('createNewFile').addEventListener('change', (e) => {
     const newFileField = document.getElementById('newFileField');
     const fileSelect = document.getElementById('fileSelect');
+    const sheetSelectField = document.getElementById('sheetSelectField');
     if (e.target.checked) {
       newFileField.classList.remove('hidden');
       fileSelect.disabled = true;
+      sheetSelectField.style.display = 'none';
     } else {
       newFileField.classList.add('hidden');
       fileSelect.disabled = false;
     }
   });
 
-  // Calcular cuánto debe automáticamente
-  document.getElementById('addTotalPagar').addEventListener('input', calculateDebt);
-  document.getElementById('addPago').addEventListener('input', calculateDebt);
+  // Cargar hojas cuando se selecciona un archivo
+  document.getElementById('fileSelect').addEventListener('change', async (e) => {
+    const fileName = e.target.value;
+    const sheetSelectField = document.getElementById('sheetSelectField');
+    const sheetSelect = document.getElementById('sheetSelect');
+    
+    if (fileName && selectedDirectory) {
+      try {
+        const sheets = await window.electronAPI.getSheetNames(selectedDirectory, fileName);
+        sheetSelect.innerHTML = '<option value="">Seleccione una maestría</option>';
+        sheets.forEach(sheet => {
+          const option = document.createElement('option');
+          option.value = sheet;
+          option.textContent = sheet;
+          sheetSelect.appendChild(option);
+        });
+        sheetSelectField.style.display = 'block';
+      } catch (error) {
+        console.error('Error al cargar hojas:', error);
+      }
+    } else {
+      sheetSelectField.style.display = 'none';
+    }
+  });
+
+  // Calcular Total a Pagar automáticamente (UC * Costo UC)
+  document.getElementById('addUC').addEventListener('input', () => {
+    const uc = parseFloat(document.getElementById('addUC').value) || 0;
+    const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
+    document.getElementById('addTotalPagar').value = (uc * costoUC).toFixed(2);
+    calculateDebt();
+  });
+  
+  document.getElementById('addCostoUC').addEventListener('input', () => {
+    const uc = parseFloat(document.getElementById('addUC').value) || 0;
+    const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
+    document.getElementById('addTotalPagar').value = (uc * costoUC).toFixed(2);
+    calculateDebt();
+  });
+
+  // Calcular resta automáticamente
+  document.getElementById('addAbono').addEventListener('input', calculateDebt);
 
   // Buscar estudiante para autocompletar
   document.getElementById('searchStudentBtn').addEventListener('click', searchStudentForAdd);
@@ -128,20 +171,14 @@ function setupEventListeners() {
       // Mostrar formulario
       studentForm.style.display = 'block';
       document.getElementById('addCedula').value = cedula;
-      document.getElementById('addNombre').value = '';
-      document.getElementById('addApellido').value = '';
-      document.getElementById('addCarrera').value = '';
-      document.getElementById('addSemestre').value = '';
+      document.getElementById('addNombreCompleto').value = '';
       
-      document.getElementById('addNombre').readOnly = false;
-      document.getElementById('addApellido').readOnly = false;
-      document.getElementById('addCarrera').readOnly = false;
-      document.getElementById('addSemestre').readOnly = false;
+      document.getElementById('addNombreCompleto').readOnly = false;
       
-      // Autocompletar con costo por semestre
-      const semesterCost = localStorage.getItem('semesterCost');
-      if (semesterCost) {
-        document.getElementById('addTotalPagar').value = parseFloat(semesterCost).toFixed(2);
+      // Autocompletar con costo por UC
+      const costoUC = localStorage.getItem('costoUC');
+      if (costoUC) {
+        document.getElementById('addCostoUC').value = parseFloat(costoUC).toFixed(2);
       }
       
       // Limpiar mensaje de advertencia
@@ -175,19 +212,11 @@ function setupEventListeners() {
 }
 
 function loadSavedData() {
-  // Verificar si hay directorio guardado
-  const savedDir = localStorage.getItem('excelDirectory');
-  if (savedDir) {
-    selectedDirectory = savedDir;
-    document.getElementById('initialModal').classList.remove('is-active');
-    updateDirectoryDisplay();
-    loadExcelFiles();
-  }
-
   // Cargar costo guardado
-  const savedCost = localStorage.getItem('semesterCost');
-  if (savedCost) {
-    document.getElementById('semesterCost').value = savedCost;
+  const savedCost = localStorage.getItem('costoUC');
+  const costoUCInput = document.getElementById('costoUC');
+  if (savedCost && costoUCInput) {
+    costoUCInput.value = savedCost;
   }
 }
 
@@ -235,9 +264,9 @@ function updateFilesList(files) {
 
 function calculateDebt() {
   const totalPagar = parseFloat(document.getElementById('addTotalPagar').value) || 0;
-  const pago = parseFloat(document.getElementById('addPago').value) || 0;
-  const debe = totalPagar - pago;
-  document.getElementById('addDebe').value = debe >= 0 ? debe.toFixed(2) : 0;
+  const abono = parseFloat(document.getElementById('addAbono').value) || 0;
+  const resta = totalPagar - abono;
+  document.getElementById('addResta').value = resta >= 0 ? resta.toFixed(2) : 0;
 }
 
 async function searchStudentForAdd() {
@@ -265,23 +294,17 @@ async function searchStudentForAdd() {
       // Estudiante encontrado - mostrar formulario con datos
       studentForm.style.display = 'block';
       document.getElementById('addCedula').value = cedula;
-      document.getElementById('addNombre').value = data.student.nombre;
-      document.getElementById('addApellido').value = data.student.apellido;
-      document.getElementById('addCarrera').value = data.student.carrera;
-      document.getElementById('addSemestre').value = '';
+      document.getElementById('addNombreCompleto').value = data.student.nombre_completo;
       
-      // Autocompletar Total a Pagar con deuda pendiente o costo por semestre
-      const semesterCost = localStorage.getItem('semesterCost');
+      // Autocompletar Total a Pagar con deuda pendiente o costo por UC
+      const costoUC = localStorage.getItem('costoUC');
       if (data.totalDebt > 0) {
         document.getElementById('addTotalPagar').value = data.totalDebt.toFixed(2);
-      } else if (semesterCost) {
-        document.getElementById('addTotalPagar').value = parseFloat(semesterCost).toFixed(2);
+      } else if (costoUC) {
+        document.getElementById('addCostoUC').value = parseFloat(costoUC).toFixed(2);
       }
       
-      document.getElementById('addNombre').readOnly = true;
-      document.getElementById('addApellido').readOnly = true;
-      document.getElementById('addCarrera').readOnly = true;
-      document.getElementById('addSemestre').readOnly = false;
+      document.getElementById('addNombreCompleto').readOnly = true;
       
       addResults.innerHTML = '<div class="notification is-success"><button class="delete"></button>Estudiante encontrado. Datos autocompletados.</div>';
     } else {
@@ -301,20 +324,17 @@ async function searchStudentForAdd() {
 
 function clearAddForm() {
   document.getElementById('addCedula').value = '';
-  document.getElementById('addNombre').value = '';
-  document.getElementById('addApellido').value = '';
-  document.getElementById('addCarrera').value = '';
+  document.getElementById('addNombreCompleto').value = '';
+  document.getElementById('addAsignatura').value = '';
   document.getElementById('addFecha').value = '';
-  document.getElementById('addReferencia').value = '';
-  document.getElementById('addPago').value = '';
+  document.getElementById('addUC').value = '';
+  document.getElementById('addCostoUC').value = '';
+  document.getElementById('addAbono').value = '';
   document.getElementById('addTotalPagar').value = '';
-  document.getElementById('addDebe').value = '';
-  document.getElementById('addSemestre').value = '';
+  document.getElementById('addResta').value = '';
+  document.getElementById('addObservacion').value = '';
   
-  document.getElementById('addNombre').readOnly = false;
-  document.getElementById('addApellido').readOnly = false;
-  document.getElementById('addCarrera').readOnly = false;
-  document.getElementById('addSemestre').readOnly = false;
+  document.getElementById('addNombreCompleto').readOnly = false;
 }
 
 async function searchStudent() {
@@ -339,19 +359,18 @@ async function searchStudent() {
       return;
     }
 
-    const { student, payments, totalDebt, semesters } = data;
+    const { student, payments, totalDebt, trimestres } = data;
 
     let html = `
       <div class="box summary-box mt-5">
         <h2 class="title is-5 has-text-white mb-4">Información del Alumno</h2>
         <div class="columns is-multiline">
           <div class="column is-6">
-            <p class="has-text-white-ter mb-2"><strong class="has-text-white">Nombre:</strong> ${student.nombre} ${student.apellido}</p>
+            <p class="has-text-white-ter mb-2"><strong class="has-text-white">Nombre:</strong> ${student.nombre_completo}</p>
             <p class="has-text-white-ter mb-2"><strong class="has-text-white">Cédula:</strong> ${student.cedula}</p>
           </div>
           <div class="column is-6">
-            <p class="has-text-white-ter mb-2"><strong class="has-text-white">Carrera:</strong> ${student.carrera}</p>
-            <p class="has-text-white-ter mb-2"><strong class="has-text-white">Semestres:</strong> ${semesters}</p>
+            <p class="has-text-white-ter mb-2"><strong class="has-text-white">Trimestres:</strong> ${trimestres}</p>
           </div>
           <div class="column is-12">
             <p class="title is-3 has-text-white mt-2">Deuda Total: $${totalDebt.toFixed(2)}</p>
@@ -372,22 +391,30 @@ async function searchStudent() {
           <thead>
             <tr>
               <th>Fecha</th>
-              <th>Semestre</th>
-              <th>Nro. Referencia</th>
+              <th>Trimestre</th>
+              <th>Maestría</th>
+              <th>Asignatura</th>
+              <th>U.C</th>
+              <th>Costo U.C</th>
               <th>Total a Pagar</th>
-              <th>Pago</th>
-              <th>Debe</th>
+              <th>Abono</th>
+              <th>Resta</th>
+              <th>Observación</th>
             </tr>
           </thead>
           <tbody>
             ${payments.map(p => `
               <tr>
                 <td>${p.fecha || 'N/A'}</td>
-                <td><span class="tag is-info is-light">${p.semestre}</span></td>
-                <td>${p.nro_referencia_del_pago || 'N/A'}</td>
+                <td><span class="tag is-info is-light">${p.trimestre}</span></td>
+                <td><span class="tag is-link is-light">${p._sheet || 'N/A'}</span></td>
+                <td>${p.asignatura || 'N/A'}</td>
+                <td>${p.uc || ''}</td>
+                <td>$${(p.costo_uc || 0).toFixed(2)}</td>
                 <td><strong>$${(p.total_a_pagar || 0).toFixed(2)}</strong></td>
-                <td><span class="tag is-success">$${(p.pago || 0).toFixed(2)}</span></td>
-                <td><span class="tag ${p.cuanto_debe > 0 ? 'is-warning' : 'is-success'}">$${(p.cuanto_debe || 0).toFixed(2)}</span></td>
+                <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
+                <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
+                <td>${p.observacion || ''}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -410,7 +437,7 @@ async function addPayment() {
   }
 
   const createNew = document.getElementById('createNewFile').checked;
-  let fileName;
+  let fileName, sheetName;
 
   if (createNew) {
     fileName = document.getElementById('newFileName').value.trim();
@@ -419,39 +446,51 @@ async function addPayment() {
       return;
     }
     if (!fileName.endsWith('.xlsx')) fileName += '.xlsx';
+    sheetName = null; // Para archivo nuevo, se usará el nombre por defecto
   } else {
     fileName = document.getElementById('fileSelect').value;
     if (!fileName) {
       resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un archivo.</div>';
       return;
     }
+    
+    sheetName = document.getElementById('sheetSelect').value;
+    if (!sheetName) {
+      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione una maestría (hoja).</div>';
+      return;
+    }
   }
+
+  const uc = parseFloat(document.getElementById('addUC').value) || 0;
+  const costoUC = parseFloat(document.getElementById('addCostoUC').value) || 0;
+  const totalAPagar = uc * costoUC;
 
   const paymentData = {
     cedula: document.getElementById('addCedula').value.trim(),
-    nombre: document.getElementById('addNombre').value.trim(),
-    apellido: document.getElementById('addApellido').value.trim(),
-    carrera: document.getElementById('addCarrera').value.trim(),
+    nombre_completo: document.getElementById('addNombreCompleto').value.trim(),
+    asignatura: document.getElementById('addAsignatura').value.trim(),
+    uc: uc,
+    costo_uc: costoUC,
+    total_a_pagar: totalAPagar,
     fecha: document.getElementById('addFecha').value,
-    nro_referencia_del_pago: document.getElementById('addReferencia').value.trim(),
-    pago: parseFloat(document.getElementById('addPago').value) || 0,
-    total_a_pagar: parseFloat(document.getElementById('addTotalPagar').value) || 0,
-    cuanto_debe: parseFloat(document.getElementById('addDebe').value) || 0,
-    semestre: document.getElementById('addSemestre').value.trim()
+    abono: parseFloat(document.getElementById('addAbono').value) || 0,
+    resta: parseFloat(document.getElementById('addResta').value) || 0,
+    observacion: document.getElementById('addObservacion').value.trim()
   };
 
-  if (!paymentData.cedula || !paymentData.nombre || !paymentData.apellido) {
-    resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, complete los campos obligatorios (Cédula, Nombre, Apellido).</div>';
+  if (!paymentData.cedula || !paymentData.nombre_completo) {
+    resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, complete los campos obligatorios (Cédula, Nombre Completo).</div>';
     return;
   }
 
   try {
-    await window.electronAPI.addPayment(selectedDirectory, fileName, paymentData);
+    await window.electronAPI.addPayment(selectedDirectory, fileName, paymentData, sheetName);
     resultsDiv.innerHTML = '<div class="notification is-success"><button class="delete"></button>¡Pago agregado exitosamente!</div>';
     
     // Limpiar formulario
     document.getElementById('studentForm').style.display = 'none';
     document.getElementById('searchCedula').value = '';
+    document.getElementById('sheetSelectField').style.display = 'none';
     clearAddForm();
     
     if (createNew) {

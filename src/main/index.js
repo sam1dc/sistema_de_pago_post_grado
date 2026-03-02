@@ -53,9 +53,17 @@ ipcMain.handle('get-excel-files', async (event, directory) => {
   }
 });
 
-ipcMain.handle('add-payment', async (event, { directory, fileName, paymentData }) => {
+ipcMain.handle('get-sheet-names', async (event, { directory, fileName }) => {
   try {
-    return excelWriter.addPayment(directory, fileName, paymentData);
+    return excelReader.getSheetNames(directory, fileName);
+  } catch (error) {
+    throw new Error(`Error al obtener hojas: ${error.message}`);
+  }
+});
+
+ipcMain.handle('add-payment', async (event, { directory, fileName, paymentData, sheetName }) => {
+  try {
+    return excelWriter.addPayment(directory, fileName, paymentData, sheetName);
   } catch (error) {
     throw new Error(`Error al agregar pago: ${error.message}`);
   }

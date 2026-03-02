@@ -47,28 +47,9 @@
         </div>
         <div class="column">
           <div class="field">
-            <label class="label">Nombre</label>
+            <label class="label">Nombre Completo</label>
             <div class="control">
-              <input class="input" type="text" id="addNombre" placeholder="Nombre">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="columns">
-        <div class="column">
-          <div class="field">
-            <label class="label">Apellido</label>
-            <div class="control">
-              <input class="input" type="text" id="addApellido" placeholder="Apellido">
-            </div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="field">
-            <label class="label">Carrera</label>
-            <div class="control">
-              <input class="input" type="text" id="addCarrera" placeholder="Carrera">
+              <input class="input" type="text" id="addNombreCompleto" placeholder="Nombre y Apellido">
             </div>
           </div>
         </div>
@@ -76,14 +57,15 @@
 
       <h3 class="subtitle is-6 mb-4 mt-5">Detalles del Pago</h3>
 
-      <div class="field">
-        <label class="label">Semestre</label>
-        <div class="control">
-          <input class="input" type="text" id="addSemestre" placeholder="Ej: 2026-1">
-        </div>
-      </div>
-
       <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Asignatura</label>
+            <div class="control">
+              <input class="input" type="text" id="addAsignatura" placeholder="Ej: PREINSCRIPCIÓN, INSCRIPCIÓN, UC">
+            </div>
+          </div>
+        </div>
         <div class="column">
           <div class="field">
             <label class="label">Fecha</label>
@@ -92,11 +74,25 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="columns">
         <div class="column">
           <div class="field">
-            <label class="label">Nro. Referencia</label>
+            <label class="label">U.C (Unidades de Crédito)</label>
             <div class="control">
-              <input class="input" type="text" id="addReferencia" placeholder="Número de referencia">
+              <input class="input" type="number" id="addUC" placeholder="0" step="1">
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">Costo por U.C</label>
+            <div class="control has-icons-left">
+              <input class="input" type="number" id="addCostoUC" placeholder="0.00" step="0.01">
+              <span class="icon is-left">
+                <i class="mdi mdi-currency-usd"></i>
+              </span>
             </div>
           </div>
         </div>
@@ -107,7 +103,7 @@
           <div class="field">
             <label class="label">Total a Pagar</label>
             <div class="control has-icons-left">
-              <input class="input" type="number" id="addTotalPagar" placeholder="0.00" step="0.01">
+              <input class="input" type="number" id="addTotalPagar" placeholder="0.00" step="0.01" readonly>
               <span class="icon is-left">
                 <i class="mdi mdi-currency-usd"></i>
               </span>
@@ -116,9 +112,9 @@
         </div>
         <div class="column">
           <div class="field">
-            <label class="label">Pago</label>
+            <label class="label">Abono</label>
             <div class="control has-icons-left">
-              <input class="input" type="number" id="addPago" placeholder="0.00" step="0.01">
+              <input class="input" type="number" id="addAbono" placeholder="0.00" step="0.01">
               <span class="icon is-left">
                 <i class="mdi mdi-currency-usd"></i>
               </span>
@@ -128,12 +124,19 @@
       </div>
 
       <div class="field">
-        <label class="label">Cuánto Debe</label>
+        <label class="label">Resta</label>
         <div class="control has-icons-left">
-          <input class="input" type="number" id="addDebe" placeholder="0.00" step="0.01" readonly>
+          <input class="input" type="number" id="addResta" placeholder="0.00" step="0.01" readonly>
           <span class="icon is-left">
             <i class="mdi mdi-currency-usd"></i>
           </span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Observación</label>
+        <div class="control">
+          <textarea class="textarea" id="addObservacion" placeholder="Ej: REF 9069 TASA" rows="2"></textarea>
         </div>
       </div>
 
@@ -148,6 +151,17 @@
         </div>
       </div>
 
+      <div class="field" id="sheetSelectField" style="display: none;">
+        <label class="label">Maestría (Hoja del Excel)</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select id="sheetSelect">
+              <option value="">Seleccione una maestría</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <div class="box mt-3">
         <label class="checkbox">
           <input type="checkbox" id="createNewFile">
@@ -155,7 +169,7 @@
         </label>
         <div class="field mt-3 hidden" id="newFileField">
           <div class="control">
-            <input class="input" type="text" id="newFileName" placeholder="Nombre del archivo (ej: pagos_2026-1.xlsx)">
+            <input class="input" type="text" id="newFileName" placeholder="Nombre del archivo (ej: CONTROL DE PAGOS DEL TRIMESTRE 2026-1.xlsx)">
           </div>
         </div>
       </div>
