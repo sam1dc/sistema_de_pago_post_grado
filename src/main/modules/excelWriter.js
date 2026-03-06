@@ -78,7 +78,78 @@ function createNewExcelFile(directory, fileName) {
   return fileName;
 }
 
+function deletePayment(directory, fileName, sheetName, rowIndex) {
+  const filePath = path.join(directory, fileName);
+  
+  if (!fs.existsSync(filePath)) {
+    throw new Error('Archivo no encontrado');
+  }
+  
+  const workbook = XLSX.readFile(filePath);
+  
+  if (!workbook.Sheets[sheetName]) {
+    throw new Error('Hoja no encontrada');
+  }
+  
+  const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+  
+  // Eliminar la fila (rowIndex es el índice en el array rawData)
+  if (rowIndex < 0 || rowIndex >= rawData.length) {
+    throw new Error('Índice de fila inválido');
+  }
+  
+  rawData.splice(rowIndex, 1);
+  
+  // Actualizar la hoja
+  workbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet(rawData);
+  XLSX.writeFile(workbook, filePath);
+  
+  return true;
+}
+
+function updatePayment(directory, fileName, sheetName, rowIndex, paymentData) {
+  const filePath = path.join(directory, fileName);
+  
+  if (!fs.existsSync(filePath)) {
+    throw new Error('Archivo no encontrado');
+  }
+  
+  const workbook = XLSX.readFile(filePath);
+  
+  if (!workbook.Sheets[sheetName]) {
+    throw new Error('Hoja no encontrada');
+  }
+  
+  const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+  
+  if (rowIndex < 0 || rowIndex >= rawData.length) {
+    throw new Error('Índice de fila inválido');
+  }
+  
+  // Actualizar la fila
+  rawData[rowIndex] = [
+    paymentData.nombre_completo,
+    paymentData.cedula,
+    paymentData.asignatura,
+    paymentData.uc,
+    paymentData.costo_uc,
+    paymentData.total_a_pagar,
+    paymentData.fecha,
+    paymentData.abono,
+    paymentData.resta,
+    paymentData.observacion
+  ];
+  
+  // Actualizar la hoja
+  workbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet(rawData);
+  XLSX.writeFile(workbook, filePath);
+  
+  return true;
+}
+
 module.exports = {
   addPayment,
-  createNewExcelFile
+  createNewExcelFile,
+  deletePayment,
+  updatePayment
 };

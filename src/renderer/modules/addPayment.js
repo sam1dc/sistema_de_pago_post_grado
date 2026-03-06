@@ -124,6 +124,35 @@ export async function searchStudentForAdd(selectedDirectory) {
 
   studentForm.style.display = 'none';
   
+  // Limpiar campos del formulario antes de buscar
+  document.getElementById('addCedula').value = '';
+  document.getElementById('addNombreCompleto').value = '';
+  document.getElementById('addNombreCompleto').readOnly = false;
+  document.getElementById('addAsignatura').value = '';
+  document.getElementById('addUC').value = '';
+  document.getElementById('addCostoUC').value = '';
+  document.getElementById('addAbono').value = '';
+  document.getElementById('addTotalPagar').value = '';
+  document.getElementById('addResta').value = '';
+  document.getElementById('addObservacion').value = '';
+  
+  // Limpiar selectores de archivo
+  const fileSelect = document.getElementById('fileSelect');
+  if (fileSelect) fileSelect.value = '';
+  const sheetSelect = document.getElementById('sheetSelect');
+  if (sheetSelect) {
+    sheetSelect.innerHTML = '<option value="">Seleccione primero un archivo</option>';
+    sheetSelect.disabled = true;
+  }
+  
+  // Ocultar y limpiar deuda actual
+  const deudaActualInfo = document.getElementById('deudaActualInfo');
+  if (deudaActualInfo) {
+    deudaActualInfo.style.display = 'none';
+    const deudaActualMonto = document.getElementById('deudaActualMonto');
+    if (deudaActualMonto) deudaActualMonto.textContent = '0.00';
+  }
+  
   // Ocultar botón OCR por defecto
   const ocrButtonContainer = document.getElementById('ocrButtonContainer');
   if (ocrButtonContainer) ocrButtonContainer.style.display = 'none';

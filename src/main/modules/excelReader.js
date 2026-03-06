@@ -43,7 +43,8 @@ function readExcelFiles(directory) {
           observacion: row[9],
           trimestre: trimestre,
           _file: file,
-          _sheet: sheetName
+          _sheet: sheetName,
+          _rowIndex: i
         };
         
         allRecords.push(record);

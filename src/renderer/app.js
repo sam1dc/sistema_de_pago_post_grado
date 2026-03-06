@@ -228,6 +228,57 @@ function setupEventListeners() {
     searchStudentBtn.addEventListener('click', () => searchStudentForAdd(selectedDirectory));
   }
 
+  // Limpiar mensaje de deuda cuando se cambia la cédula
+  const searchCedula = document.getElementById('searchCedula');
+  if (searchCedula) {
+    searchCedula.addEventListener('input', () => {
+      const addResults = document.getElementById('addResults');
+      if (addResults) addResults.innerHTML = '';
+      const studentForm = document.getElementById('studentForm');
+      if (studentForm) studentForm.style.display = 'none';
+      const ocrButtonContainer = document.getElementById('ocrButtonContainer');
+      if (ocrButtonContainer) ocrButtonContainer.style.display = 'none';
+      
+      // Limpiar campos del formulario
+      const addCedula = document.getElementById('addCedula');
+      if (addCedula) addCedula.value = '';
+      const addNombreCompleto = document.getElementById('addNombreCompleto');
+      if (addNombreCompleto) {
+        addNombreCompleto.value = '';
+        addNombreCompleto.readOnly = false;
+      }
+      
+      // Limpiar campos de pago
+      const addAsignatura = document.getElementById('addAsignatura');
+      if (addAsignatura) addAsignatura.value = '';
+      const addUC = document.getElementById('addUC');
+      if (addUC) addUC.value = '';
+      const addCostoUC = document.getElementById('addCostoUC');
+      if (addCostoUC) addCostoUC.value = '';
+      const addAbono = document.getElementById('addAbono');
+      if (addAbono) addAbono.value = '';
+      const addTotalPagar = document.getElementById('addTotalPagar');
+      if (addTotalPagar) addTotalPagar.value = '';
+      const addResta = document.getElementById('addResta');
+      if (addResta) addResta.value = '';
+      const addObservacion = document.getElementById('addObservacion');
+      if (addObservacion) addObservacion.value = '';
+      
+      // Limpiar selectores de archivo
+      const fileSelect = document.getElementById('fileSelect');
+      if (fileSelect) fileSelect.value = '';
+      const sheetSelect = document.getElementById('sheetSelect');
+      if (sheetSelect) {
+        sheetSelect.innerHTML = '<option value="">Seleccione primero un archivo</option>';
+        sheetSelect.disabled = true;
+      }
+      
+      // Ocultar deuda actual
+      const deudaActualInfo = document.getElementById('deudaActualInfo');
+      if (deudaActualInfo) deudaActualInfo.style.display = 'none';
+    });
+  }
+
   // Evento para botón agregar cédula
   document.body.addEventListener('click', (e) => {
     if (e.target.id === 'btnAgregarCedula') {
@@ -451,6 +502,196 @@ function setupEventListeners() {
       }
     });
   }
+
+  // Delegación de eventos para botones dinámicos (editar/eliminar)
+  document.addEventListener('click', async (e) => {
+    // Eliminar pago
+    if (e.target.closest('.btnDeletePayment')) {
+      const btn = e.target.closest('.btnDeletePayment');
+      const file = btn.dataset.file;
+      const sheet = btn.dataset.sheet;
+      const row = parseInt(btn.dataset.row);
+      
+      if (confirm('¿Estás seguro de eliminar este pago?')) {
+        try {
+          await window.electronAPI.deletePayment(selectedDirectory, file, sheet, row);
+          showToast('Pago eliminado correctamente', 'is-success');
+          // Recargar búsqueda
+          const searchBtn = document.getElementById('searchBtn');
+          if (searchBtn) searchBtn.click();
+        } catch (error) {
+          showToast('Error al eliminar pago: ' + error.message, 'is-danger');
+        }
+      }
+    }
+    
+    // Editar pago
+    if (e.target.closest('.btnEditPayment')) {
+      const btn = e.target.closest('.btnEditPayment');
+      const payment = JSON.parse(btn.dataset.payment);
+      openEditModal(payment);
+    }
+  });
+}
+
+function showToast(message, type = 'is-info') {
+  if (window.bulmaToast) {
+    window.bulmaToast.toast({
+      message,
+      type,
+      dismissible: false,
+      pauseOnHover: true,
+      duration: 3000,
+      position: 'top-center',
+      closeOnClick: true,
+      opacity: 1,
+      single: false
+    });
+  }
+}
+
+function openEditModal(payment) {
+  // Detectar y convertir fecha al formato correcto para input type="date" (YYYY-MM-DD)
+  let fechaValue = '';
+  if (payment.fecha) {
+    // Si ya está en formato YYYY-MM-DD, usarla directamente
+    if (payment.fecha.includes('-') && payment.fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      fechaValue = payment.fecha;
+    } 
+    // Si está en formato DD/MM/YYYY, convertir
+    else if (payment.fecha.includes('/')) {
+      const parts = payment.fecha.split('/');
+      if (parts.length === 3) {
+        fechaValue = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+    }
+  }
+  
+  // Crear modal dinámicamente
+  const modalHTML = `
+    <div class="modal is-active" id="editPaymentModal">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Editar Pago</p>
+          <button class="delete" aria-label="close" id="closeEditModal"></button>
+        </header>
+        <section class="modal-card-body">
+          <div class="field">
+            <label class="label">Fecha</label>
+            <input class="input" type="date" id="editFecha" value="${fechaValue}">
+          </div>
+          <div class="field">
+            <label class="label">Asignatura</label>
+            <input class="input" type="text" id="editAsignatura" value="${payment.asignatura || ''}">
+          </div>
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label">U.C</label>
+                <input class="input" type="number" id="editUC" value="${payment.uc || 0}">
+              </div>
+            </div>
+            <div class="column">
+              <div class="field">
+                <label class="label">Costo U.C</label>
+                <input class="input" type="number" step="0.01" id="editCostoUC" value="${payment.costo_uc || 0}">
+              </div>
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label">Total a Pagar</label>
+                <input class="input" type="number" step="0.01" id="editTotalPagar" value="${payment.total_a_pagar || 0}">
+              </div>
+            </div>
+            <div class="column">
+              <div class="field">
+                <label class="label">Abono</label>
+                <input class="input" type="number" step="0.01" id="editAbono" value="${payment.abono || 0}">
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Resta</label>
+            <input class="input" type="number" step="0.01" id="editResta" value="${payment.resta || 0}" readonly>
+          </div>
+          <div class="field">
+            <label class="label">Observación</label>
+            <textarea class="textarea" id="editObservacion">${payment.observacion || ''}</textarea>
+          </div>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button is-primary" id="saveEditBtn">Guardar</button>
+          <button class="button" id="cancelEditBtn">Cancelar</button>
+        </footer>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  const modal = document.getElementById('editPaymentModal');
+  const closeBtn = document.getElementById('closeEditModal');
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  const saveBtn = document.getElementById('saveEditBtn');
+  
+  const closeModal = () => modal.remove();
+  
+  closeBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  modal.querySelector('.modal-background').addEventListener('click', closeModal);
+  
+  // Auto-calcular resta
+  const editAbono = document.getElementById('editAbono');
+  const editTotalPagar = document.getElementById('editTotalPagar');
+  const editResta = document.getElementById('editResta');
+  
+  const calcResta = () => {
+    const total = parseFloat(editTotalPagar.value) || 0;
+    const abono = parseFloat(editAbono.value) || 0;
+    editResta.value = (total - abono).toFixed(2);
+  };
+  
+  editAbono.addEventListener('input', calcResta);
+  editTotalPagar.addEventListener('input', calcResta);
+  
+  saveBtn.addEventListener('click', async () => {
+    // Convertir fecha de YYYY-MM-DD a DD/MM/YYYY
+    const fechaInput = document.getElementById('editFecha').value;
+    let fechaFormatted = '';
+    if (fechaInput) {
+      const parts = fechaInput.split('-');
+      if (parts.length === 3) {
+        fechaFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    }
+    
+    const updatedPayment = {
+      nombre_completo: payment.nombre_completo,
+      cedula: payment.cedula,
+      asignatura: document.getElementById('editAsignatura').value,
+      uc: document.getElementById('editUC').value,
+      costo_uc: parseFloat(document.getElementById('editCostoUC').value) || 0,
+      total_a_pagar: parseFloat(document.getElementById('editTotalPagar').value) || 0,
+      fecha: fechaFormatted,
+      abono: parseFloat(document.getElementById('editAbono').value) || 0,
+      resta: parseFloat(document.getElementById('editResta').value) || 0,
+      observacion: document.getElementById('editObservacion').value
+    };
+    
+    try {
+      await window.electronAPI.updatePayment(selectedDirectory, payment._file, payment._sheet, payment._rowIndex, updatedPayment);
+      showToast('Pago actualizado correctamente', 'is-success');
+      closeModal();
+      // Recargar búsqueda
+      const searchBtn = document.getElementById('searchBtn');
+      if (searchBtn) searchBtn.click();
+    } catch (error) {
+      showToast('Error al actualizar pago: ' + error.message, 'is-danger');
+    }
+  });
 }
 
 function loadSavedData() {

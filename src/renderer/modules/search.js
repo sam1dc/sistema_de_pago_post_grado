@@ -320,6 +320,7 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
             <th>Abono</th>
             <th>Resta</th>
             <th>Observación</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -335,6 +336,23 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
               <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
               <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
+              <td>
+                <div class="buttons are-small has-addons">
+                  <button class="button is-info btnEditPayment" 
+                    data-file="${p._file}" 
+                    data-sheet="${p._sheet}" 
+                    data-row="${p._rowIndex}"
+                    data-payment='${JSON.stringify(p)}'>
+                    <span class="icon"><i class="mdi mdi-pencil"></i></span>
+                  </button>
+                  <button class="button is-danger btnDeletePayment" 
+                    data-file="${p._file}" 
+                    data-sheet="${p._sheet}" 
+                    data-row="${p._rowIndex}">
+                    <span class="icon"><i class="mdi mdi-delete"></i></span>
+                  </button>
+                </div>
+              </td>
             </tr>
           `).join('')}
         </tbody>

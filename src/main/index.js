@@ -100,3 +100,19 @@ ipcMain.handle('get-last-file-and-sheet', async (event, { directory, cedula }) =
     throw new Error(`Error al obtener último archivo: ${error.message}`);
   }
 });
+
+ipcMain.handle('delete-payment', async (event, { directory, fileName, sheetName, rowIndex }) => {
+  try {
+    return excelWriter.deletePayment(directory, fileName, sheetName, rowIndex);
+  } catch (error) {
+    throw new Error(`Error al eliminar pago: ${error.message}`);
+  }
+});
+
+ipcMain.handle('update-payment', async (event, { directory, fileName, sheetName, rowIndex, paymentData }) => {
+  try {
+    return excelWriter.updatePayment(directory, fileName, sheetName, rowIndex, paymentData);
+  } catch (error) {
+    throw new Error(`Error al actualizar pago: ${error.message}`);
+  }
+});
