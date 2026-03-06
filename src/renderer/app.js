@@ -186,9 +186,9 @@ function setupEventListeners() {
   });
 
   // Modal inicial
-  const selectDirBtn = document.getElementById('selectDirBtn');
-  if (selectDirBtn) {
-    selectDirBtn.addEventListener('click', async () => {
+  const selectInitialDir = document.getElementById('selectInitialDir');
+  if (selectInitialDir) {
+    selectInitialDir.addEventListener('click', async () => {
       const directory = await window.electronAPI.selectDirectory();
       if (directory) {
         selectedDirectory = directory;
