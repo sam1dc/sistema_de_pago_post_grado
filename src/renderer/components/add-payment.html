@@ -152,35 +152,56 @@
       </div>
 
       <div class="field">
-        <label class="label">Archivo Excel</label>
-        <div class="control">
-          <div class="select is-fullwidth">
-            <select id="fileSelect">
-              <option value="">Seleccione un archivo</option>
-            </select>
+      <div class="box mt-4">
+        <label class="label">Seleccione una opción:</label>
+        
+        <div class="field">
+          <label class="radio">
+            <input type="radio" name="fileOption" id="useExistingFile" checked>
+            Usar archivo Excel existente
+          </label>
+        </div>
+        
+        <div id="existingFileFields">
+          <div class="field">
+            <label class="label">Archivo Excel</label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select id="fileSelect">
+                  <option value="">Seleccione un archivo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field" id="sheetSelectField" style="display: none;">
+            <label class="label">Maestría (Hoja del Excel)</label>
+            <div class="control">
+              <div class="select is-fullwidth">
+                <select id="sheetSelect">
+                  <option value="">Seleccione una maestría</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="field" id="sheetSelectField" style="display: none;">
-        <label class="label">Maestría (Hoja del Excel)</label>
-        <div class="control">
-          <div class="select is-fullwidth">
-            <select id="sheetSelect">
-              <option value="">Seleccione una maestría</option>
-            </select>
-          </div>
+        <hr class="my-4">
+
+        <div class="field">
+          <label class="radio">
+            <input type="radio" name="fileOption" id="createNewFile">
+            Crear nuevo archivo Excel
+          </label>
         </div>
-      </div>
-
-      <div class="box mt-3">
-        <label class="checkbox">
-          <input type="checkbox" id="createNewFile">
-          Crear nuevo archivo
-        </label>
-        <div class="field mt-3 hidden" id="newFileField">
-          <div class="control">
-            <input class="input" type="text" id="newFileName" placeholder="Nombre del archivo (ej: CONTROL DE PAGOS DEL TRIMESTRE 2026-1.xlsx)">
+        
+        <div id="newFileField" style="display: none;">
+          <div class="field">
+            <label class="label">CONTROL DE PAGOS DEL TRIMESTRE</label>
+            <div class="control">
+              <input class="input" type="text" id="newFileName" placeholder="Ej: 2026-1">
+            </div>
+            <p class="help">Solo ingrese el trimestre. Ejemplo: 2026-1</p>
           </div>
         </div>
       </div>

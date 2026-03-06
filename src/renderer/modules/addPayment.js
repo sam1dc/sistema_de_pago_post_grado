@@ -27,13 +27,12 @@ export async function addPayment(selectedDirectory) {
   let fileName, sheetName;
 
   if (createNew) {
-    fileName = document.getElementById('newFileName').value.trim();
-    if (!fileName) {
-      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese el nombre del archivo.</div>';
+    const trimestre = document.getElementById('newFileName').value.trim();
+    if (!trimestre) {
+      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese el trimestre (Ej: 2026-1).</div>';
       return;
     }
-    if (!fileName.endsWith('.xlsx')) fileName += '.xlsx';
-    sheetName = null;
+    fileName = `CONTROL DE PAGOS DEL TRIMESTRE ${trimestre}.xlsx`;    sheetName = null;
   } else {
     fileName = document.getElementById('fileSelect').value;
     if (!fileName) {
@@ -222,7 +221,14 @@ export function clearAddForm() {
   document.getElementById('addObservacion').value = '';
   
   document.getElementById('addNombreCompleto').readOnly = false;
-}
+  
+  // Resetear radio buttons
+  const useExistingFile = document.getElementById('useExistingFile');
+  if (useExistingFile) useExistingFile.checked = true;
+  const existingFileFields = document.getElementById('existingFileFields');
+  if (existingFileFields) existingFileFields.style.display = 'block';
+  const newFileField = document.getElementById('newFileField');
+  if (newFileField) newFileField.style.display = 'none';}
 
 export async function calculateDebt(selectedDirectory) {
   const cedula = document.getElementById('addCedula').value.trim();

@@ -131,21 +131,32 @@ function setupEventListeners() {
     });
   }
 
-  // Toggle crear nuevo archivo
+  // Toggle entre usar archivo existente o crear nuevo
+  const useExistingFile = document.getElementById('useExistingFile');
   const createNewFile = document.getElementById('createNewFile');
-  if (createNewFile) {
-    createNewFile.addEventListener('change', (e) => {
+  
+  if (useExistingFile && createNewFile) {
+    useExistingFile.addEventListener('change', () => {
+      const existingFileFields = document.getElementById('existingFileFields');
       const newFileField = document.getElementById('newFileField');
       const fileSelect = document.getElementById('fileSelect');
       const sheetSelectField = document.getElementById('sheetSelectField');
-      if (e.target.checked) {
-        if (newFileField) newFileField.classList.remove('hidden');
-        if (fileSelect) fileSelect.disabled = true;
-        if (sheetSelectField) sheetSelectField.style.display = 'none';
-      } else {
-        if (newFileField) newFileField.classList.add('hidden');
-        if (fileSelect) fileSelect.disabled = false;
-      }
+      
+      if (existingFileFields) existingFileFields.style.display = 'block';
+      if (newFileField) newFileField.style.display = 'none';
+      
+      // Resetear selectores
+      if (fileSelect) fileSelect.value = '';
+      if (sheetSelectField) sheetSelectField.style.display = 'none';
+    });
+    
+    createNewFile.addEventListener('change', () => {
+      const existingFileFields = document.getElementById('existingFileFields');
+      const newFileField = document.getElementById('newFileField');
+      const sheetSelectField = document.getElementById('sheetSelectField');
+      if (existingFileFields) existingFileFields.style.display = 'none';
+      if (newFileField) newFileField.style.display = 'block';
+      if (sheetSelectField) sheetSelectField.style.display = 'none';
     });
   }
 
