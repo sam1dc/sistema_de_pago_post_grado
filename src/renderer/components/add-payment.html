@@ -9,54 +9,6 @@
       </span>
     </h2>
 
-    <div class="ocr-upload-container mb-5">
-      <input type="file" id="paymentImageInput" accept="image/*" style="display: none;">
-      
-      <div id="ocrDropZone" class="ocr-drop-zone">
-        <div class="ocr-icon-wrapper">
-          <span class="icon is-large">
-            <i class="mdi mdi-bank-transfer mdi-48px"></i>
-          </span>
-        </div>
-        <h3 class="title is-5 has-text-centered mb-2">Escanear Comprobante</h3>
-        <p class="has-text-grey has-text-centered mb-4">
-          Arrastra tu captura de pago o haz clic para seleccionar
-        </p>
-        <div class="bank-icons">
-          <span class="icon has-text-grey-light" title="BDV">
-            <i class="mdi mdi-bank mdi-24px"></i>
-          </span>
-          <span class="icon has-text-grey-light" title="Banesco">
-            <i class="mdi mdi-bank mdi-24px"></i>
-          </span>
-          <span class="icon has-text-grey-light" title="Mercantil">
-            <i class="mdi mdi-bank mdi-24px"></i>
-          </span>
-          <span class="icon has-text-grey-light" title="Provincial">
-            <i class="mdi mdi-bank mdi-24px"></i>
-          </span>
-        </div>
-      </div>
-
-      <div id="ocrPreview" class="ocr-preview" style="display: none;">
-        <div class="columns is-mobile is-vcentered">
-          <div class="column is-narrow">
-            <figure class="image is-64x64">
-              <img id="ocrPreviewImage" src="" alt="Preview">
-            </figure>
-          </div>
-          <div class="column">
-            <p class="has-text-weight-semibold" id="ocrFileName"></p>
-            <p class="help" id="ocrStatusText">Procesando con OCR...</p>
-          </div>
-          <div class="column is-narrow">
-            <button class="delete is-medium" id="ocrRemoveBtn"></button>
-          </div>
-        </div>
-        <progress class="progress is-small is-primary mt-2" id="ocrProgress" max="100">0%</progress>
-      </div>
-    </div>
-
     <div class="field">
       <label class="label">Cédula del Alumno</label>
       <div class="field has-addons">
@@ -72,6 +24,13 @@
               <i class="mdi mdi-magnify"></i>
             </span>
             <span>Buscar</span>
+          </button>
+        </div>
+        <div class="control" id="ocrButtonContainer" style="display: none;">
+          <button class="button is-info" id="openOcrModalBtn" title="Escanear comprobante de pago">
+            <span class="icon">
+              <i class="mdi mdi-camera-image"></i>
+            </span>
           </button>
         </div>
       </div>
@@ -245,5 +204,70 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal OCR -->
+<div class="modal" id="ocrModal">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">
+        <span class="icon-text">
+          <span class="icon has-text-info">
+            <i class="mdi mdi-camera-image"></i>
+          </span>
+          <span>Escanear Comprobante de Pago</span>
+        </span>
+      </p>
+      <button class="delete" aria-label="close" id="closeOcrModalBtn"></button>
+    </header>
+    <section class="modal-card-body">
+      <input type="file" id="paymentImageInput" accept="image/*" style="display: none;">
+      
+      <div id="ocrDropZone" class="ocr-drop-zone">
+        <div class="ocr-icon-wrapper">
+          <span class="icon is-large">
+            <i class="mdi mdi-bank-transfer mdi-48px"></i>
+          </span>
+        </div>
+        <h3 class="title is-5 has-text-centered mb-2">Escanear Comprobante</h3>
+        <p class="has-text-grey has-text-centered mb-4">
+          Arrastra tu captura de pago o haz clic para seleccionar
+        </p>
+        <div class="bank-icons">
+          <span class="icon has-text-grey-light" title="BDV">
+            <i class="mdi mdi-bank mdi-24px"></i>
+          </span>
+          <span class="icon has-text-grey-light" title="Banesco">
+            <i class="mdi mdi-bank mdi-24px"></i>
+          </span>
+          <span class="icon has-text-grey-light" title="Mercantil">
+            <i class="mdi mdi-bank mdi-24px"></i>
+          </span>
+          <span class="icon has-text-grey-light" title="Provincial">
+            <i class="mdi mdi-bank mdi-24px"></i>
+          </span>
+        </div>
+      </div>
+
+      <div id="ocrPreview" class="ocr-preview" style="display: none;">
+        <div class="columns is-mobile is-vcentered">
+          <div class="column is-narrow">
+            <figure class="image is-64x64">
+              <img id="ocrPreviewImage" src="" alt="Preview">
+            </figure>
+          </div>
+          <div class="column">
+            <p class="has-text-weight-semibold" id="ocrFileName"></p>
+            <p class="help" id="ocrStatusText">Procesando con OCR...</p>
+          </div>
+          <div class="column is-narrow">
+            <button class="delete is-medium" id="ocrRemoveBtn"></button>
+          </div>
+        </div>
+        <progress class="progress is-small is-primary mt-2" id="ocrProgress" max="100">0%</progress>
+      </div>
+    </section>
   </div>
 </div>

@@ -4,6 +4,10 @@ export function initPaymentOCR() {
   const imageInput = document.getElementById('paymentImageInput');
   const dropZone = document.getElementById('ocrDropZone');
   const removeBtn = document.getElementById('ocrRemoveBtn');
+  const openModalBtn = document.getElementById('openOcrModalBtn');
+  const closeModalBtn = document.getElementById('closeOcrModalBtn');
+  const modal = document.getElementById('ocrModal');
+  const modalBackground = modal?.querySelector('.modal-background');
   
   if (imageInput && dropZone) {
     // Click en la zona para abrir selector
@@ -43,6 +47,42 @@ export function initPaymentOCR() {
   if (removeBtn) {
     removeBtn.addEventListener('click', resetOCR);
   }
+
+  // Abrir modal
+  if (openModalBtn && modal) {
+    openModalBtn.addEventListener('click', () => {
+      modal.classList.add('is-active');
+    });
+  }
+
+  // Cerrar modal
+  if (closeModalBtn && modal) {
+    closeModalBtn.addEventListener('click', () => {
+      modal.classList.remove('is-active');
+      resetOCR();
+    });
+  }
+
+  if (modalBackground && modal) {
+    modalBackground.addEventListener('click', () => {
+      modal.classList.remove('is-active');
+      resetOCR();
+    });
+  }
+}
+
+export function showOCRButton() {
+  const ocrButtonContainer = document.getElementById('ocrButtonContainer');
+  if (ocrButtonContainer) {
+    ocrButtonContainer.style.display = 'block';
+  }
+}
+
+export function hideOCRButton() {
+  const ocrButtonContainer = document.getElementById('ocrButtonContainer');
+  if (ocrButtonContainer) {
+    ocrButtonContainer.style.display = 'none';
+  }
 }
 
 function showToast(message, type = 'is-info') {
@@ -78,6 +118,7 @@ async function handleImageUpload(file) {
   const fileName = document.getElementById('ocrFileName');
   const statusText = document.getElementById('ocrStatusText');
   const progress = document.getElementById('ocrProgress');
+  const modal = document.getElementById('ocrModal');
   
   // Mostrar preview
   if (dropZone) dropZone.style.display = 'none';
@@ -124,8 +165,18 @@ async function handleImageUpload(file) {
     if (extractedData.monto || extractedData.referencia || extractedData.fecha) {
       applyExtractedData(extractedData);
       showToast('✓ Datos extraídos correctamente', 'is-success');
+      
+      // Cerrar modal después de 1 segundo
+      setTimeout(() => {
+        if (modal) modal.classList.remove('is-active');
+        resetOCR();
+      }, 1000);
     } else {
       showToast('No se detectaron datos. Ingresa manualmente.', 'is-warning');
+      setTimeout(() => {
+        if (modal) modal.classList.remove('is-active');
+        resetOCR();
+      }, 2000);
     }
   } catch (error) {
     console.error('OCR Error:', error);

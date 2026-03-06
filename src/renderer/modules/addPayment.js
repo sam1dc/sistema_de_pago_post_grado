@@ -107,6 +107,10 @@ export async function searchStudentForAdd(selectedDirectory) {
   const studentForm = document.getElementById('studentForm');
 
   studentForm.style.display = 'none';
+  
+  // Ocultar botón OCR por defecto
+  const ocrButtonContainer = document.getElementById('ocrButtonContainer');
+  if (ocrButtonContainer) ocrButtonContainer.style.display = 'none';
 
   if (!selectedDirectory) {
     addResults.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
@@ -126,6 +130,8 @@ export async function searchStudentForAdd(selectedDirectory) {
       document.getElementById('addCedula').value = cedula;
       document.getElementById('addNombreCompleto').value = data.student.nombre_completo;
       
+      // Mostrar botón OCR
+      if (ocrButtonContainer) ocrButtonContainer.style.display = 'block';      
       // Mostrar deuda total pero NO autocompletar Total a Pagar
       // El usuario debe seleccionar archivo/maestría primero
       if (data.totalDebt > 0) {
@@ -147,7 +153,11 @@ export async function searchStudentForAdd(selectedDirectory) {
           <button class="button is-small is-warning mt-2" id="btnAgregarCedula">Agregar Cédula</button>
         </div>
       `;
-    }
+      
+      // Mostrar formulario y botón OCR para nuevo estudiante
+      studentForm.style.display = 'block';
+      document.getElementById('addCedula').value = cedula;
+      if (ocrButtonContainer) ocrButtonContainer.style.display = 'block';    }
   } catch (error) {
     addResults.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
   }
