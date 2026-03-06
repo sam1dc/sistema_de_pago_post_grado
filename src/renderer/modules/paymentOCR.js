@@ -2,34 +2,109 @@
 
 export function initPaymentOCR() {
   const imageInput = document.getElementById('paymentImageInput');
+  const dropZone = document.getElementById('ocrDropZone');
+  const removeBtn = document.getElementById('ocrRemoveBtn');
   
-  if (imageInput) {
-    imageInput.addEventListener('change', handleImageUpload);
+  if (imageInput && dropZone) {
+    // Click en la zona para abrir selector
+    dropZone.addEventListener('click', () => imageInput.click());
+    
+    // Drag & Drop
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('drag-over');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+          handleImageUpload(file);
+        } else {
+          showToast('Solo se permiten archivos de imagen', 'is-danger');
+        }
+      }
+    });
+    
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleImageUpload(file);
+    });
+  }
+  
+  if (removeBtn) {
+    removeBtn.addEventListener('click', resetOCR);
   }
 }
 
-async function handleImageUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+function showToast(message, type = 'is-info') {
+  if (window.bulmaToast) {
+    window.bulmaToast.toast({
+      message,
+      type,
+      dismissible: true,
+      pauseOnHover: true,
+      duration: 3000,
+      position: 'top-center',
+      closeOnClick: true,
+      opacity: 1,
+      single: false
+    });
+  }
+}
 
-  const fileName = document.getElementById('paymentImageName');
-  const progress = document.getElementById('ocrProgress');
-  const result = document.getElementById('ocrResult');
+function resetOCR() {
+  const dropZone = document.getElementById('ocrDropZone');
+  const preview = document.getElementById('ocrPreview');
+  const imageInput = document.getElementById('paymentImageInput');
   
+  if (dropZone) dropZone.style.display = 'block';
+  if (preview) preview.style.display = 'none';
+  if (imageInput) imageInput.value = '';
+}
+
+async function handleImageUpload(file) {
+  const dropZone = document.getElementById('ocrDropZone');
+  const preview = document.getElementById('ocrPreview');
+  const previewImage = document.getElementById('ocrPreviewImage');
+  const fileName = document.getElementById('ocrFileName');
+  const statusText = document.getElementById('ocrStatusText');
+  const progress = document.getElementById('ocrProgress');
+  
+  // Mostrar preview
+  if (dropZone) dropZone.style.display = 'none';
+  if (preview) preview.style.display = 'block';
   if (fileName) fileName.textContent = file.name;
-  if (progress) progress.style.display = 'block';
-  if (result) result.innerHTML = '';
+  if (statusText) {
+    statusText.textContent = 'Procesando con OCR...';
+    statusText.style.display = 'block';
+  }
+  
+  // Crear URL para preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (previewImage) previewImage.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  
+  showToast('Procesando imagen con OCR...', 'is-info');
 
   try {
-    // Preprocesar imagen para mejorar OCR
     const processedImage = await preprocessImage(file);
     
     const { data: { text } } = await Tesseract.recognize(processedImage, 'spa', {
       logger: (m) => {
         if (m.status === 'recognizing text' && progress) {
           const percent = Math.round(m.progress * 100);
-          const progressBar = progress.querySelector('progress');
-          if (progressBar) progressBar.value = percent;
+          progress.value = percent;
         }
       }
     });
@@ -37,25 +112,25 @@ async function handleImageUpload(event) {
     console.log('Texto extraído:', text);
 
     const extractedData = extractPaymentData(text);
-    
     console.log('Datos extraídos:', extractedData);
     
-    if (progress) progress.style.display = 'none';
+    // Cambiar estado a completado
+    if (statusText) {
+      statusText.textContent = '✓ Procesado';
+      statusText.classList.remove('is-info');
+      statusText.classList.add('has-text-success');
+    }
     
     if (extractedData.monto || extractedData.referencia || extractedData.fecha) {
-      displayExtractedData(extractedData);
       applyExtractedData(extractedData);
+      showToast('✓ Datos extraídos correctamente', 'is-success');
     } else {
-      if (result) {
-        result.innerHTML = `<div class="notification is-warning"><button class="delete"></button>No se pudieron extraer datos automáticamente. Ingresa los datos manualmente.</div>`;
-      }
+      showToast('No se detectaron datos. Ingresa manualmente.', 'is-warning');
     }
   } catch (error) {
     console.error('OCR Error:', error);
-    if (progress) progress.style.display = 'none';
-    if (result) {
-      result.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Error al procesar la imagen.</div>';
-    }
+    showToast('Error al procesar la imagen', 'is-danger');
+    resetOCR();
   }
 }
 
@@ -204,44 +279,6 @@ function extractPaymentData(text) {
   return data;
 }
 
-function displayExtractedData(data) {
-  const result = document.getElementById('ocrResult');
-  if (!result) return;
-
-  const tasa = parseFloat(localStorage.getItem('tasaBCV')) || 0;
-  
-  let html = '<div class="notification is-success">';
-  html += '<button class="delete"></button>';
-  html += '<strong>✓ Datos extraídos de la imagen:</strong>';
-  html += '<div class="content mt-3">';
-  
-  if (data.monto && tasa > 0) {
-    const usd = data.monto / tasa;
-    html += `<div class="box has-background-white mb-2">`;
-    html += `<p class="mb-1"><strong>Monto pagado:</strong></p>`;
-    html += `<p class="is-size-5 has-text-weight-bold has-text-info">Bs ${data.monto.toFixed(2)}</p>`;
-    html += `<p class="is-size-6 has-text-grey">Tasa: ${tasa.toFixed(2)} → <strong class="has-text-primary">$${usd.toFixed(2)} USD</strong></p>`;
-    html += `</div>`;
-  } else if (data.monto) {
-    html += `<div class="box has-background-white mb-2">`;
-    html += `<p><strong>Monto:</strong> Bs ${data.monto.toFixed(2)}</p>`;
-    html += `<p class="help is-warning">⚠️ Configura la tasa del BCV en Configuración para convertir a USD</p>`;
-    html += `</div>`;
-  }
-  
-  if (data.referencia) {
-    html += `<p><strong>Referencia:</strong> ${data.referencia}</p>`;
-  }
-  
-  if (data.fecha) {
-    const fecha = new Date(data.fecha);
-    html += `<p><strong>Fecha:</strong> ${fecha.toLocaleDateString('es-VE')}</p>`;
-  }
-  
-  html += '</div></div>';
-  result.innerHTML = html;
-}
-
 function applyExtractedData(data) {
   const tasa = parseFloat(localStorage.getItem('tasaBCV')) || 0;
   
@@ -254,7 +291,7 @@ function applyExtractedData(data) {
       abonoInput.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // Agregar info en observación con la diferencia
+    // Agregar info en observación
     const observacionInput = document.getElementById('addObservacion');
     if (observacionInput) {
       let obs = `Pago Bs ${data.monto.toFixed(2)} / Tasa ${tasa.toFixed(2)}`;
