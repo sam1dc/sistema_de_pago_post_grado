@@ -1,4 +1,20 @@
 // Módulo de agregar pagos
+
+function showToast(message, type = 'is-info') {
+  if (window.bulmaToast) {
+    window.bulmaToast.toast({
+      message,
+      type,
+      dismissible: false,
+      pauseOnHover: true,
+      duration: 3000,
+      position: 'top-center',
+      closeOnClick: true,
+      opacity: 1,
+      single: false
+    });
+  }
+}
 export async function addPayment(selectedDirectory) {
   const resultsDiv = document.getElementById('addResults');
 
@@ -135,14 +151,15 @@ export async function searchStudentForAdd(selectedDirectory) {
       // Mostrar deuda total pero NO autocompletar Total a Pagar
       // El usuario debe seleccionar archivo/maestría primero
       if (data.totalDebt > 0) {
-        addResults.innerHTML = `<div class="notification is-info"><button class="delete"></button>Estudiante encontrado. Deuda total acumulada: $${data.totalDebt.toFixed(2)}. Seleccione el archivo y maestría para ver la deuda específica.</div>`;
+        showToast(`Estudiante encontrado. Deuda total: $${data.totalDebt.toFixed(2)}`, 'is-info');
       } else {
         const costoUC = localStorage.getItem('costoUC');
         if (costoUC) {
           document.getElementById('addCostoUC').value = parseFloat(costoUC).toFixed(2);
         }
-        addResults.innerHTML = '<div class="notification is-success"><button class="delete"></button>Estudiante encontrado. No tiene deudas pendientes.</div>';
+        showToast('Estudiante encontrado sin deudas', 'is-success');
       }
+      addResults.innerHTML = '';
       
       document.getElementById('addNombreCompleto').readOnly = true;
     } else {

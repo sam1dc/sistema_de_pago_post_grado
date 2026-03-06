@@ -90,7 +90,7 @@ function showToast(message, type = 'is-info') {
     window.bulmaToast.toast({
       message,
       type,
-      dismissible: true,
+      dismissible: false,
       pauseOnHover: true,
       duration: 3000,
       position: 'top-center',
