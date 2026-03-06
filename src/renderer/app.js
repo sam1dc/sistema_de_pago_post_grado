@@ -6,6 +6,106 @@ import { initPaymentOCR } from './modules/paymentOCR.js';
 
 let selectedDirectory = null;
 
+// Función global para recargar todos los selectores del sistema
+window.reloadSystemData = async function() {
+  const currentDirectory = selectedDirectory || localStorage.getItem('excelDirectory');
+  if (!currentDirectory) {
+    console.log('No hay directorio seleccionado');
+    return;
+  }
+  
+  console.log('Recargando sistema con directorio:', currentDirectory);
+  
+  try {
+    // Recargar archivos Excel
+    const files = await window.electronAPI.getExcelFiles(currentDirectory);
+    console.log('Archivos encontrados:', files);
+    
+    // Actualizar selector en "Agregar Pago"
+    const fileSelect = document.getElementById('fileSelect');
+    if (fileSelect && files) {
+      const currentValue = fileSelect.value;
+      fileSelect.innerHTML = '<option value="">Seleccione un archivo</option>';
+      files.forEach(file => {
+        const option = document.createElement('option');
+        option.value = file;
+        option.textContent = file;
+        fileSelect.appendChild(option);
+      });
+      if (currentValue) fileSelect.value = currentValue;
+      console.log('Selector de archivos actualizado');
+    }
+    
+    // Recargar filtros de "Consultar Pagos"
+    await reloadSearchFilters(currentDirectory);
+    
+    console.log('Sistema actualizado correctamente');
+  } catch (error) {
+    console.error('Error al recargar datos del sistema:', error);
+  }
+};
+
+// Función para recargar filtros de búsqueda
+async function reloadSearchFilters(directory) {
+  try {
+    const maestriaFilter = document.getElementById('searchMaestriaFilter');
+    const trimestreFilter = document.getElementById('searchTrimestreFilter');
+    
+    if (!maestriaFilter && !trimestreFilter) return;
+    
+    // Obtener todos los archivos y leer sus datos
+    const files = await window.electronAPI.getExcelFiles(directory);
+    const allMaestrias = new Set();
+    const allTrimestres = new Set();
+    
+    for (const file of files) {
+      // Extraer trimestre del nombre del archivo
+      const trimestreMatch = file.match(/(\d{4}-\d+)/);
+      if (trimestreMatch) {
+        allTrimestres.add(trimestreMatch[1]);
+      }
+      
+      // Obtener hojas (maestrías) del archivo
+      try {
+        const sheets = await window.electronAPI.getSheetNames(directory, file);
+        sheets.forEach(sheet => allMaestrias.add(sheet));
+      } catch (error) {
+        console.error(`Error al leer hojas de ${file}:`, error);
+      }
+    }
+    
+    // Actualizar filtro de maestrías
+    if (maestriaFilter && allMaestrias.size > 0) {
+      const currentValue = maestriaFilter.value;
+      maestriaFilter.innerHTML = '<option value="">Todas las maestrías</option>';
+      [...allMaestrias].sort().forEach(m => {
+        const option = document.createElement('option');
+        option.value = m;
+        option.textContent = m.trim();
+        maestriaFilter.appendChild(option);
+      });
+      if (currentValue) maestriaFilter.value = currentValue;
+      console.log('Filtro de maestrías actualizado:', allMaestrias.size, 'maestrías');
+    }
+    
+    // Actualizar filtro de trimestres
+    if (trimestreFilter && allTrimestres.size > 0) {
+      const currentValue = trimestreFilter.value;
+      trimestreFilter.innerHTML = '<option value="">Todos los trimestres</option>';
+      [...allTrimestres].sort().forEach(t => {
+        const option = document.createElement('option');
+        option.value = t;
+        option.textContent = t;
+        trimestreFilter.appendChild(option);
+      });
+      if (currentValue) trimestreFilter.value = currentValue;
+      console.log('Filtro de trimestres actualizado:', allTrimestres.size, 'trimestres');
+    }
+  } catch (error) {
+    console.error('Error al recargar filtros:', error);
+  }
+}
+
 // Inicializar aplicación
 async function initApp() {
   await window.loadAllComponents();
@@ -168,24 +268,33 @@ function setupEventListeners() {
       const sheetSelectField = document.getElementById('sheetSelectField');
       const sheetSelect = document.getElementById('sheetSelect');
       
-      if (fileName && selectedDirectory) {
-        try {
-          const sheets = await window.electronAPI.getSheetNames(selectedDirectory, fileName);
-          if (sheetSelect) {
-            sheetSelect.innerHTML = '<option value="">Seleccione una maestría</option>';
-            sheets.forEach(sheet => {
-              const option = document.createElement('option');
-              option.value = sheet;
-              option.textContent = sheet;
-              sheetSelect.appendChild(option);
-            });
-          }
-          if (sheetSelectField) sheetSelectField.style.display = 'block';
-        } catch (error) {
-          console.error('Error al cargar hojas:', error);
-        }
-      } else {
+      if (!fileName) {
         if (sheetSelectField) sheetSelectField.style.display = 'none';
+        return;
+      }
+      
+      if (!selectedDirectory) {
+        console.error('No hay directorio seleccionado');
+        alert('Por favor, seleccione un directorio primero en Configuración');
+        return;
+      }
+      
+      try {
+        const sheets = await window.electronAPI.getSheetNames(selectedDirectory, fileName);
+        if (sheetSelect) {
+          sheetSelect.innerHTML = '<option value="">Seleccione una maestría</option>';
+          sheets.forEach(sheet => {
+            const option = document.createElement('option');
+            option.value = sheet;
+            option.textContent = sheet.trim(); // Mostrar sin espacios extras
+            sheetSelect.appendChild(option);
+          });
+          sheetSelect.disabled = false;
+        }
+        if (sheetSelectField) sheetSelectField.style.display = 'block';
+      } catch (error) {
+        console.error('Error al cargar hojas:', error);
+        alert('Error al cargar las maestrías del archivo');
       }
     });
   }
@@ -527,6 +636,12 @@ function setupEventListeners() {
         try {
           await window.electronAPI.deletePayment(selectedDirectory, file, sheet, row);
           showToast('Pago eliminado correctamente', 'is-success');
+          
+          // Recargar todo el sistema
+          if (window.reloadSystemData) {
+            await window.reloadSystemData();
+          }
+          
           // Recargar búsqueda
           const searchBtn = document.getElementById('searchBtn');
           if (searchBtn) searchBtn.click();
@@ -696,6 +811,12 @@ function openEditModal(payment) {
       await window.electronAPI.updatePayment(selectedDirectory, payment._file, payment._sheet, payment._rowIndex, updatedPayment);
       showToast('Pago actualizado correctamente', 'is-success');
       closeModal();
+      
+      // Recargar todo el sistema
+      if (window.reloadSystemData) {
+        await window.reloadSystemData();
+      }
+      
       // Recargar búsqueda
       const searchBtn = document.getElementById('searchBtn');
       if (searchBtn) searchBtn.click();

@@ -63,18 +63,28 @@ async function searchByFilters(selectedDirectory, maestriaFilter, trimestreFilte
   if (fechaDesde || fechaHasta) {
     allPayments = allPayments.filter(p => {
       if (!p.fecha) return false;
-      // Convertir fecha del formato DD/MM/YYYY a YYYY-MM-DD
-      const parts = p.fecha.split('/');
-      if (parts.length === 3) {
-        const fechaPago = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-        
-        if (fechaDesde && fechaHasta) {
-          return fechaPago >= fechaDesde && fechaPago <= fechaHasta;
-        } else if (fechaDesde) {
-          return fechaPago >= fechaDesde;
-        } else if (fechaHasta) {
-          return fechaPago <= fechaHasta;
+      
+      let fechaPago;
+      // Detectar formato de fecha
+      if (p.fecha.includes('/')) {
+        // Formato DD/MM/YYYY
+        const parts = p.fecha.split('/');
+        if (parts.length === 3) {
+          fechaPago = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
         }
+      } else if (p.fecha.includes('-')) {
+        // Formato YYYY-MM-DD (ya está en el formato correcto)
+        fechaPago = p.fecha;
+      }
+      
+      if (!fechaPago) return false;
+      
+      if (fechaDesde && fechaHasta) {
+        return fechaPago >= fechaDesde && fechaPago <= fechaHasta;
+      } else if (fechaDesde) {
+        return fechaPago >= fechaDesde;
+      } else if (fechaHasta) {
+        return fechaPago <= fechaHasta;
       }
       return false;
     });

@@ -13,9 +13,19 @@ function addPayment(directory, fileName, paymentData, sheetName = null) {
     // Si no se especifica hoja, usar la primera
     targetSheetName = sheetName || workbook.SheetNames[0];
     
-    // Verificar que la hoja existe
-    if (!workbook.Sheets[targetSheetName]) {
-      throw new Error(`La hoja "${targetSheetName}" no existe en el archivo`);
+    // Buscar la hoja (con o sin espacios al final)
+    let foundSheet = workbook.Sheets[targetSheetName];
+    if (!foundSheet) {
+      // Intentar buscar con trim
+      const trimmedName = targetSheetName.trim();
+      foundSheet = Object.keys(workbook.Sheets).find(name => 
+        name.trim() === trimmedName
+      );
+      if (foundSheet) {
+        targetSheetName = foundSheet;
+      } else {
+        throw new Error(`La hoja "${targetSheetName}" no existe en el archivo`);
+      }
     }
     
     const worksheet = workbook.Sheets[targetSheetName];
@@ -39,31 +49,51 @@ function addPayment(directory, fileName, paymentData, sheetName = null) {
     // Actualizar la hoja específica
     workbook.Sheets[targetSheetName] = XLSX.utils.aoa_to_sheet(rawData);
   } else {
-    // Archivo nuevo, crear estructura completa
+    // Archivo nuevo, crear estructura completa con todas las maestrías
     const trimestre = fileName.match(/\d{4}-\d+/)?.[0] || '2026-1';
-    targetSheetName = sheetName || 'MAESTRIA EN ING. ELÉCTRICA ';
-    const titulo = `MAESTRÍA EN ING. ELÉCTRICA ${trimestre}`;
+    targetSheetName = sheetName || 'MAESTRIA EN ING. ELÉCTRICA';
     
-    const rawData = [
-      [titulo], // Fila 0: Título
-      ['NOMBRE Y APELLIDO', 'CÉDULA', 'ASIGNATURA', 'U.C', 'COSTO U.C', 'TOTAL A PAGAR', 'FECHA', 'ABONO', 'RESTA', 'OBSERVACIÓN'], // Fila 1: Encabezados
-      [
-        paymentData.nombre_completo,
-        paymentData.cedula,
-        paymentData.asignatura,
-        paymentData.uc,
-        paymentData.costo_uc,
-        paymentData.total_a_pagar,
-        paymentData.fecha,
-        paymentData.abono,
-        paymentData.resta,
-        paymentData.observacion
-      ] // Fila 2: Primer dato
+    // Lista de todas las maestrías (con espacio al final para consistencia)
+    const maestrias = [
+      'MAESTRIA EN ING. ELÉCTRICA ',
+      'MAESTRIA EN ING. INDUSTRIAL',
+      'MAESTRIA EN ING. ELECTRÓNICA ',
+      'MAESTRIA EN ING. METALÚRGICA ',
+      'MAESTRIA EN ING. MECÁNICA '
     ];
     
     workbook = XLSX.utils.book_new();
-    const newWorksheet = XLSX.utils.aoa_to_sheet(rawData);
-    XLSX.utils.book_append_sheet(workbook, newWorksheet, targetSheetName);
+    
+    // Buscar la maestría con o sin espacio
+    const targetWithSpace = maestrias.find(m => m.trim() === targetSheetName.trim());
+    
+    // Crear todas las hojas de maestrías
+    maestrias.forEach(maestria => {
+      const titulo = `${maestria.trim()} ${trimestre}`;
+      const rawData = [
+        [titulo], // Fila 0: Título
+        ['NOMBRE Y APELLIDO', 'CÉDULA', 'ASIGNATURA', 'U.C', 'COSTO U.C', 'TOTAL A PAGAR', 'FECHA', 'ABONO', 'RESTA', 'OBSERVACIÓN'] // Fila 1: Encabezados
+      ];
+      
+      // Si esta es la maestría seleccionada, agregar el pago
+      if (maestria === targetWithSpace) {
+        rawData.push([
+          paymentData.nombre_completo,
+          paymentData.cedula,
+          paymentData.asignatura,
+          paymentData.uc,
+          paymentData.costo_uc,
+          paymentData.total_a_pagar,
+          paymentData.fecha,
+          paymentData.abono,
+          paymentData.resta,
+          paymentData.observacion
+        ]);
+      }
+      
+      const worksheet = XLSX.utils.aoa_to_sheet(rawData);
+      XLSX.utils.book_append_sheet(workbook, worksheet, maestria);
+    });
   }
 
   XLSX.writeFile(workbook, filePath);

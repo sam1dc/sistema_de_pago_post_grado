@@ -32,7 +32,13 @@ export async function addPayment(selectedDirectory) {
       resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese el trimestre (Ej: 2026-1).</div>';
       return;
     }
-    fileName = `CONTROL DE PAGOS DEL TRIMESTRE ${trimestre}.xlsx`;    sheetName = null;
+    fileName = `CONTROL DE PAGOS DEL TRIMESTRE ${trimestre}.xlsx`;
+    
+    sheetName = document.getElementById("newFileMaestriaSelect").value;
+    if (!sheetName) {
+      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione una maestría.</div>';
+      return;
+    }
   } else {
     fileName = document.getElementById('fileSelect').value;
     if (!fileName) {
@@ -72,6 +78,16 @@ export async function addPayment(selectedDirectory) {
   // RESTA = deuda anterior + nuevo cargo - abono
   const resta = (deudaAcumulada + totalAPagar) - abono;
 
+  // Convertir fecha de YYYY-MM-DD a DD/MM/YYYY
+  const fechaInput = document.getElementById("addFecha").value;
+  let fechaFormateada = "";
+  if (fechaInput) {
+    const parts = fechaInput.split("-");
+    if (parts.length === 3) {
+      fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+  }
+
   const paymentData = {
     cedula: cedula,
     nombre_completo: document.getElementById('addNombreCompleto').value.trim(),
@@ -79,7 +95,7 @@ export async function addPayment(selectedDirectory) {
     uc: uc || '',
     costo_uc: costoUC || '',
     total_a_pagar: totalAPagar,
-    fecha: document.getElementById('addFecha').value,
+    fecha: fechaFormateada,
     abono: abono,
     resta: resta >= 0 ? resta : 0,
     observacion: document.getElementById('addObservacion').value.trim()
@@ -106,7 +122,11 @@ export async function addPayment(selectedDirectory) {
       document.getElementById('fileSelect').disabled = false;
     }
     
-    await window.electronAPI.getExcelFiles(selectedDirectory);
+    
+    // Recargar todo el sistema
+    if (window.reloadSystemData) {
+      await window.reloadSystemData();
+    }
     
     setTimeout(() => {
       resultsDiv.innerHTML = '';
