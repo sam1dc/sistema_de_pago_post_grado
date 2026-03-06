@@ -69,6 +69,15 @@ function setupEventListeners() {
       if (targetTab) targetTab.classList.add('active');
       item.classList.add('is-active');
       
+      // Mostrar botón OCR si el formulario de estudiante está visible en "Agregar Pago"
+      if (target === 'add-tab') {
+        const studentForm = document.getElementById('studentForm');
+        const ocrButtonContainer = document.getElementById('ocrButtonContainer');
+        if (studentForm && ocrButtonContainer && studentForm.style.display !== 'none') {
+          ocrButtonContainer.style.display = 'block';
+        }
+      }
+      
       if (window.innerWidth <= 768 && sidebar && overlay) {
         sidebar.classList.remove('is-active');
         overlay.classList.remove('is-active');
@@ -264,6 +273,10 @@ function setupEventListeners() {
       setTimeout(async () => {
         const studentForm = document.getElementById('studentForm');
         if (studentForm) studentForm.style.display = 'block';
+        
+        // Mostrar botón OCR
+        const ocrButtonContainer = document.getElementById('ocrButtonContainer');
+        if (ocrButtonContainer) ocrButtonContainer.style.display = 'block';
         
         const addCedula = document.getElementById('addCedula');
         if (addCedula) addCedula.value = cedula;
