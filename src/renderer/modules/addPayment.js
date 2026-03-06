@@ -141,7 +141,6 @@ export async function addPayment(selectedDirectory) {
       resultsDiv.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
     }
   }
-  }
 }
 
 export async function searchStudentForAdd(selectedDirectory) {
