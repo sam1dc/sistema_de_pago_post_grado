@@ -1,5 +1,21 @@
 // Módulo de conversión de divisas USD → Bs
 
+function showToast(message, type = 'is-info') {
+  if (window.bulmaToast) {
+    window.bulmaToast.toast({
+      message,
+      type,
+      dismissible: false,
+      pauseOnHover: true,
+      duration: 3000,
+      position: 'top-center',
+      closeOnClick: true,
+      opacity: 1,
+      single: false
+    });
+  }
+}
+
 export function initCurrencyConverter() {
   loadSavedRate();
   setupEventListeners();
@@ -23,20 +39,39 @@ function loadSavedRate() {
 
 function setupEventListeners() {
   const fetchBCVBtn = document.getElementById('fetchBCVBtn');
-  const montoUSDInput = document.getElementById('montoUSD');
+  const saveBCVBtn = document.getElementById('saveBCVBtn');
   const tasaBCVInput = document.getElementById('tasaBCV');
 
   if (fetchBCVBtn) {
     fetchBCVBtn.addEventListener('click', fetchBCVRate);
   }
 
-  if (montoUSDInput) {
-    montoUSDInput.addEventListener('input', calculateConversion);
+  if (saveBCVBtn) {
+    saveBCVBtn.addEventListener('click', saveBCVRate);
+  }
+}
+
+function saveBCVRate() {
+  const tasaBCVInput = document.getElementById('tasaBCV');
+  const bcvHelp = document.getElementById('bcvDateHelp');
+  
+  const tasa = parseFloat(tasaBCVInput.value);
+  
+  if (!tasa || tasa <= 0) {
+    showToast('Ingresa una tasa válida', 'is-danger');
+    return;
   }
   
-  if (tasaBCVInput) {
-    tasaBCVInput.addEventListener('input', calculateConversion);
+  localStorage.setItem('tasaBCV', tasa.toFixed(2));
+  localStorage.setItem('tasaBCVDate', new Date().toISOString());
+  
+  if (bcvHelp) {
+    const fecha = new Date();
+    bcvHelp.textContent = `Guardado: ${fecha.toLocaleString('es-VE')}`;
+    bcvHelp.className = 'help is-success';
   }
+  
+  showToast('Tasa guardada correctamente', 'is-success');
 }
 
 async function fetchBCVRate() {
@@ -53,41 +88,22 @@ async function fetchBCVRate() {
     if (data && data.promedio) {
       const tasa = data.promedio;
       tasaBCVInput.value = tasa.toFixed(2);
-      localStorage.setItem('tasaBCV', tasa.toFixed(2));
-      localStorage.setItem('tasaBCVDate', data.fechaActualizacion || new Date().toISOString());
       
       if (bcvHelp) {
         const fecha = new Date(data.fechaActualizacion);
-        bcvHelp.textContent = `Actualizado: ${fecha.toLocaleString('es-VE')}`;
-        bcvHelp.className = 'help is-success';
+        bcvHelp.textContent = `Obtenido del BCV: ${fecha.toLocaleString('es-VE')}`;
+        bcvHelp.className = 'help is-info';
       }
       
-      calculateConversion();
+      showToast('Tasa obtenida. Presiona Guardar para aplicar', 'is-success');
     }
   } catch (error) {
     if (bcvHelp) {
-      bcvHelp.textContent = 'Error al obtener la tasa. Ingresa manualmente.';
+      bcvHelp.textContent = 'Error al obtener la tasa';
       bcvHelp.className = 'help is-danger';
     }
+    showToast('Error al obtener la tasa del BCV', 'is-danger');
   } finally {
     fetchBCVBtn.classList.remove('is-loading');
-  }
-}
-
-function calculateConversion() {
-  const montoUSD = document.getElementById('montoUSD');
-  const montoBs = document.getElementById('montoBs');
-  const tasaBCV = document.getElementById('tasaBCV');
-  
-  if (!montoUSD || !montoBs || !tasaBCV) return;
-  
-  const usd = parseFloat(montoUSD.value) || 0;
-  const tasa = parseFloat(tasaBCV.value) || 0;
-  
-  if (usd > 0 && tasa > 0) {
-    const bs = usd * tasa;
-    montoBs.value = `Bs ${bs.toFixed(2)}`;
-  } else {
-    montoBs.value = 'Bs 0.00';
   }
 }
