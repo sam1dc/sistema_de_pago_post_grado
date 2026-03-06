@@ -162,6 +162,15 @@ input:disabled {
   cursor: not-allowed;
 }
 
+/* Modal Inicial Responsive */
+#initialModal .modal-card {
+  max-width: 500px;
+  width: 90%;
+  margin: 0 auto;
+  margin-left: calc(50% + 130px);
+  transform: translateX(-50%);
+}
+
 .hamburger-btn {
   display: none;
   background: none;
@@ -298,5 +307,19 @@ input:disabled {
 
   .toast {
     max-width: 90vw;
+  }
+
+  #initialModal .modal-card {
+    max-width: 95%;
+    margin-left: 50%;
+  }
+
+  #initialModal .modal-card-body {
+    padding: 1rem;
+  }
+
+  #initialModal .modal-card-head,
+  #initialModal .modal-card-foot {
+    padding: 1rem;
   }
 }
