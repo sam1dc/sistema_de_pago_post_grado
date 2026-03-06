@@ -637,16 +637,22 @@ function setupEventListeners() {
           await window.electronAPI.deletePayment(selectedDirectory, file, sheet, row);
           showToast('Pago eliminado correctamente', 'is-success');
           
-          // Recargar todo el sistema
-          if (window.reloadSystemData) {
-            await window.reloadSystemData();
-          }
-          
-          // Recargar búsqueda
+          // Recargar búsqueda primero
           const searchBtn = document.getElementById('searchBtn');
           if (searchBtn) searchBtn.click();
+          
+          // Recargar sistema después de un pequeño delay
+          setTimeout(async () => {
+            if (window.reloadSystemData) {
+              await window.reloadSystemData();
+            }
+          }, 500);
         } catch (error) {
-          showToast('Error al eliminar pago: ' + error.message, 'is-danger');
+          if (error.message.includes('EBUSY') || error.message.includes('locked')) {
+            showToast('⚠️ El archivo Excel está abierto. Por favor, cierra Microsoft Excel e intenta de nuevo.', 'is-danger');
+          } else {
+            showToast('Error al eliminar pago: ' + error.message, 'is-danger');
+          }
         }
       }
     }
@@ -812,16 +818,22 @@ function openEditModal(payment) {
       showToast('Pago actualizado correctamente', 'is-success');
       closeModal();
       
-      // Recargar todo el sistema
-      if (window.reloadSystemData) {
-        await window.reloadSystemData();
-      }
-      
-      // Recargar búsqueda
+      // Recargar búsqueda primero
       const searchBtn = document.getElementById('searchBtn');
       if (searchBtn) searchBtn.click();
+      
+      // Recargar sistema después de un pequeño delay
+      setTimeout(async () => {
+        if (window.reloadSystemData) {
+          await window.reloadSystemData();
+        }
+      }, 500);
     } catch (error) {
-      showToast('Error al actualizar pago: ' + error.message, 'is-danger');
+      if (error.message.includes('EBUSY') || error.message.includes('locked')) {
+        showToast('⚠️ El archivo Excel está abierto. Por favor, cierra Microsoft Excel e intenta de nuevo.', 'is-danger');
+      } else {
+        showToast('Error al actualizar pago: ' + error.message, 'is-danger');
+      }
     }
   });
 }

@@ -123,16 +123,24 @@ export async function addPayment(selectedDirectory) {
     }
     
     
-    // Recargar todo el sistema
-    if (window.reloadSystemData) {
-      await window.reloadSystemData();
-    }
+    
+    // Recargar sistema después de un pequeño delay
+    setTimeout(async () => {
+      if (window.reloadSystemData) {
+        await window.reloadSystemData();
+      }
+    }, 500);
     
     setTimeout(() => {
       resultsDiv.innerHTML = '';
     }, 3000);
   } catch (error) {
-    resultsDiv.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
+    if (error.message.includes('EBUSY') || error.message.includes('locked')) {
+      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>⚠️ El archivo Excel está abierto. Por favor, cierra Microsoft Excel e intenta de nuevo.</div>';
+    } else {
+      resultsDiv.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
+    }
+  }
   }
 }
 
