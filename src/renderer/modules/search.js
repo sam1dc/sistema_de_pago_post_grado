@@ -139,10 +139,10 @@ async function searchByFilters(selectedDirectory, maestriaFilter, trimestreFilte
               <td><span class="tag is-link is-light">${p._sheet || 'N/A'}</span></td>
               <td>${p.asignatura || 'N/A'}</td>
               <td>${p.uc || ''}</td>
-              <td>$${(p.costo_uc || 0).toFixed(2)}</td>
-              <td><strong>$${(p.total_a_pagar || 0).toFixed(2)}</strong></td>
-              <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
-              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
+              <td>$${(parseFloat(p.costo_uc) || 0).toFixed(2)}</td>
+              <td><strong>$${(parseFloat(p.total_a_pagar) || 0).toFixed(2)}</strong></td>
+              <td><span class="tag is-success">$${(parseFloat(p.abono) || 0).toFixed(2)}</span></td>
+              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(parseFloat(p.resta) || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
               <td>
                 <button class="button is-small is-info btnVerDetalles" data-cedula="${p.cedula}">
@@ -212,10 +212,10 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
               <td><span class="tag is-info is-light">${p.trimestre}</span></td>
               <td>${p.asignatura || 'N/A'}</td>
               <td>${p.uc || ''}</td>
-              <td>$${(p.costo_uc || 0).toFixed(2)}</td>
-              <td><strong>$${(p.total_a_pagar || 0).toFixed(2)}</strong></td>
-              <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
-              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
+              <td>$${(parseFloat(p.costo_uc) || 0).toFixed(2)}</td>
+              <td><strong>$${(parseFloat(p.total_a_pagar) || 0).toFixed(2)}</strong></td>
+              <td><span class="tag is-success">$${(parseFloat(p.abono) || 0).toFixed(2)}</span></td>
+              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(parseFloat(p.resta) || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
               <td>
                 <button class="button is-small is-info btnVerDetalles" data-cedula="${p.cedula}">
@@ -341,10 +341,10 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
               <td><span class="tag is-link is-light">${p._sheet || 'N/A'}</span></td>
               <td>${p.asignatura || 'N/A'}</td>
               <td>${p.uc || ''}</td>
-              <td>$${(p.costo_uc || 0).toFixed(2)}</td>
-              <td><strong>$${(p.total_a_pagar || 0).toFixed(2)}</strong></td>
-              <td><span class="tag is-success">$${(p.abono || 0).toFixed(2)}</span></td>
-              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(p.resta || 0).toFixed(2)}</span></td>
+              <td>$${(parseFloat(p.costo_uc) || 0).toFixed(2)}</td>
+              <td><strong>$${(parseFloat(p.total_a_pagar) || 0).toFixed(2)}</strong></td>
+              <td><span class="tag is-success">$${(parseFloat(p.abono) || 0).toFixed(2)}</span></td>
+              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(parseFloat(p.resta) || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
               <td>
                 <div class="buttons are-small has-addons">

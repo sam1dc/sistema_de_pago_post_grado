@@ -33,16 +33,19 @@ function addPayment(directory, fileName, paymentData, sheetName = null) {
     
     // Agregar nueva fila de datos con la deuda actualizada
     const newRow = [
-      paymentData.nombre_completo,
-      paymentData.cedula,
-      paymentData.asignatura,
-      paymentData.uc,
-      paymentData.costo_uc,
-      paymentData.total_a_pagar,
-      paymentData.fecha,
-      paymentData.abono,
-      paymentData.resta,
-      paymentData.observacion
+      '',                          // N°
+      '',                          // CODIGO
+      paymentData.nombre_completo, // NOMBRE Y APELLIDO
+      paymentData.cedula,          // CÉDULA
+      '',                          // CODIGO2
+      paymentData.asignatura,      // ASIGNATURA
+      paymentData.uc,              // U.C
+      paymentData.costo_uc,        // COSTO U.C
+      paymentData.total_a_pagar,   // TOTAL A PAGAR
+      paymentData.fecha,           // FECHA
+      paymentData.abono,           // ABONO
+      paymentData.resta,           // RESTA
+      paymentData.observacion      // OBSERVACIÓN
     ];
     rawData.push(newRow);
     
@@ -51,35 +54,42 @@ function addPayment(directory, fileName, paymentData, sheetName = null) {
   } else {
     // Archivo nuevo, crear estructura completa con todas las maestrías
     const trimestre = fileName.match(/\d{4}-\d+/)?.[0] || '2026-1';
-    targetSheetName = sheetName || 'MAESTRIA EN ING. ELÉCTRICA';
+    targetSheetName = sheetName || 'MAESTRÍA EN ING. ELÉCTRICA';
     
-    // Lista de todas las maestrías (con espacio al final para consistencia)
     const maestrias = [
-      'MAESTRIA EN ING. ELÉCTRICA ',
-      'MAESTRIA EN ING. INDUSTRIAL',
-      'MAESTRIA EN ING. ELECTRÓNICA ',
-      'MAESTRIA EN ING. METALÚRGICA ',
-      'MAESTRIA EN ING. MECÁNICA '
+      'MAESTRÍA EN ING. ELECTRÓNICA',
+      'MAESTRÍA EN ING. MATALÚRGICA',
+      'MAESTRÍA EN ING. ELÉCTRICA',
+      'MAESTRÍA EN ING. INDUSTRIAL',
+      'MAESTRÍA EN ING. MATEMÁTICA APL',
+      'MAESTRÍA EN ING. MECÁNICA',
+      'ESP. EN CORROSIÓN',
+      'ESP. EN GERENCIA DE MANTENIMIEN',
+      'ESP. PREVENCIÓN Y CONTROL DE R',
+      'ESP. INSTRUMENTACIÓN ',
+      'ESP. EN  TELECOMUNICACIONES',
+      'ESP. EN ELECTROMEDICINA',
+      'ESP. SOLDADURA'
     ];
     
     workbook = XLSX.utils.book_new();
     
-    // Buscar la maestría con o sin espacio
-    const targetWithSpace = maestrias.find(m => m.trim() === targetSheetName.trim());
-    
-    // Crear todas las hojas de maestrías
+    const headers = ['N°', 'CODIGO', 'NOMBRE Y APELLIDO', 'CÉDULA', 'CODIGO2', 'ASIGNATURA', 'U.C', 'COSTO U.C', 'TOTAL A PAGAR', 'FECHA', 'ABONO', 'RESTA', 'OBSERVACIÓN'];
+
     maestrias.forEach(maestria => {
       const titulo = `${maestria.trim()} ${trimestre}`;
       const rawData = [
-        [titulo], // Fila 0: Título
-        ['NOMBRE Y APELLIDO', 'CÉDULA', 'ASIGNATURA', 'U.C', 'COSTO U.C', 'TOTAL A PAGAR', 'FECHA', 'ABONO', 'RESTA', 'OBSERVACIÓN'] // Fila 1: Encabezados
+        [null, null, titulo],  // Fila 0: Título en columna 2
+        [],                    // Fila 1: Vacía
+        headers                // Fila 2: Encabezados
       ];
       
-      // Si esta es la maestría seleccionada, agregar el pago
-      if (maestria === targetWithSpace) {
+      if (maestria.trim() === targetSheetName.trim()) {
         rawData.push([
+          '', '',
           paymentData.nombre_completo,
           paymentData.cedula,
+          '',
           paymentData.asignatura,
           paymentData.uc,
           paymentData.costo_uc,
@@ -158,16 +168,19 @@ function updatePayment(directory, fileName, sheetName, rowIndex, paymentData) {
   
   // Actualizar la fila
   rawData[rowIndex] = [
-    paymentData.nombre_completo,
-    paymentData.cedula,
-    paymentData.asignatura,
-    paymentData.uc,
-    paymentData.costo_uc,
-    paymentData.total_a_pagar,
-    paymentData.fecha,
-    paymentData.abono,
-    paymentData.resta,
-    paymentData.observacion
+    '',                          // N°
+    '',                          // CODIGO
+    paymentData.nombre_completo, // NOMBRE Y APELLIDO
+    paymentData.cedula,          // CÉDULA
+    '',                          // CODIGO2
+    paymentData.asignatura,      // ASIGNATURA
+    paymentData.uc,              // U.C
+    paymentData.costo_uc,        // COSTO U.C
+    paymentData.total_a_pagar,   // TOTAL A PAGAR
+    paymentData.fecha,           // FECHA
+    paymentData.abono,           // ABONO
+    paymentData.resta,           // RESTA
+    paymentData.observacion      // OBSERVACIÓN
   ];
   
   // Actualizar la hoja

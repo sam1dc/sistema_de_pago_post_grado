@@ -2,6 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
 
+// Convierte fecha de Excel (número serial o string) a DD/MM/YYYY
+function formatExcelDate(value) {
+  if (!value) return '';
+  if (typeof value === 'number') {
+    const date = XLSX.SSF.parse_date_code(value);
+    if (!date) return String(value);
+    const d = String(date.d).padStart(2, '0');
+    const m = String(date.m).padStart(2, '0');
+    return `${d}/${m}/${date.y}`;
+  }
+  return String(value);
+}
+
 function readExcelFiles(directory) {
   const files = fs.readdirSync(directory).filter(f => f.endsWith('.xlsx') || f.endsWith('.xls'));
   let allRecords = [];
@@ -16,31 +29,32 @@ function readExcelFiles(directory) {
       // Leer como array de arrays para manejar estructura personalizada
       const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
       
-      // Fila 0: Título (ej: "MAESTRÍA EN ING. ELÉCTRICA 2026-1")
-      // Fila 1: Encabezados
-      // Fila 2+: Datos
+      // Fila 0: Título en columna 2 (ej: "MAESTRÍA EN ING. ELÉCTRICA 2026-1")
+      // Fila 1: Vacía
+      // Fila 2: Encabezados
+      // Fila 3+: Datos
       
-      if (rawData.length < 3) continue; // Hoja vacía
+      if (rawData.length < 4) continue; // Hoja vacía
       
-      const titulo = rawData[0][0] || '';
+      const titulo = rawData[0][2] || rawData[0][0] || '';
       const trimestre = titulo.match(/\d{4}-\d+/)?.[0] || '';
       
-      // Procesar datos desde fila 2
-      for (let i = 2; i < rawData.length; i++) {
+      // Procesar datos desde fila 3
+      for (let i = 3; i < rawData.length; i++) {
         const row = rawData[i];
-        if (!row[0] || !row[1]) continue; // Saltar filas vacías
+        if (!row[2] && !row[3]) continue; // Saltar filas vacías (sin nombre ni cédula)
         
         const record = {
-          nombre_completo: row[0],
-          cedula: row[1],
-          asignatura: row[2],
-          uc: row[3],
-          costo_uc: row[4],
-          total_a_pagar: row[5],
-          fecha: row[6],
-          abono: row[7],
-          resta: row[8],
-          observacion: row[9],
+          nombre_completo: row[2],
+          cedula: String(row[3] || '').replace(/\./g, ''),  // Normalizar: quitar puntos
+          asignatura: row[5],
+          uc: row[6],
+          costo_uc: row[7],
+          total_a_pagar: row[8],
+          fecha: formatExcelDate(row[9]),
+          abono: row[10],
+          resta: row[11],
+          observacion: row[12],
           trimestre: trimestre,
           _file: file,
           _sheet: sheetName,
@@ -151,8 +165,8 @@ function getLastDebtInSheet(directory, fileName, sheetName, cedula) {
   let lastResta = 0;
   for (let i = rawData.length - 1; i >= 2; i--) {
     const row = rawData[i];
-    if (String(row[1]) === String(cedula)) {
-      lastResta = Number(row[8]) || 0; // Columna 8 = Resta
+    if (String(row[3]) === String(cedula)) {
+      lastResta = Number(row[11]) || 0; // Columna 11 = Resta
       break;
     }
   }
