@@ -2,6 +2,20 @@ const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
 
+// Caché en memoria
+let _cache = { directory: null, records: null };
+
+function readExcelFilesCached(directory) {
+  if (_cache.directory === directory && _cache.records) return _cache.records;
+  const records = readExcelFiles(directory);
+  _cache = { directory, records };
+  return records;
+}
+
+function invalidateCache() {
+  _cache = { directory: null, records: null };
+}
+
 // Convierte fecha de Excel (número serial o string) a DD/MM/YYYY
 function formatExcelDate(value) {
   if (!value) return '';
@@ -70,7 +84,7 @@ function readExcelFiles(directory) {
 }
 
 function searchStudent(directory, cedula) {
-  const allRecords = readExcelFiles(directory);
+  const allRecords = readExcelFilesCached(directory);
   const studentRecords = allRecords.filter(r => String(r.cedula) === String(cedula));
   
   if (studentRecords.length === 0) return null;
@@ -122,7 +136,7 @@ function getSheetNames(directory, fileName) {
 }
 
 function searchByMaestria(directory, maestria) {
-  const allRecords = readExcelFiles(directory);
+  const allRecords = readExcelFilesCached(directory);
   const maestriaRecords = allRecords.filter(r => r._sheet === maestria);
   
   if (maestriaRecords.length === 0) return null;
@@ -175,7 +189,7 @@ function getLastDebtInSheet(directory, fileName, sheetName, cedula) {
 }
 
 function getLastFileAndSheet(directory, cedula) {
-  const allRecords = readExcelFiles(directory);
+  const allRecords = readExcelFilesCached(directory);
   const studentRecords = allRecords.filter(r => String(r.cedula) === String(cedula));
   
   if (studentRecords.length === 0) return null;
@@ -194,5 +208,6 @@ module.exports = {
   getSheetNames,
   searchByMaestria,
   getLastDebtInSheet,
-  getLastFileAndSheet
+  getLastFileAndSheet,
+  invalidateCache
 };

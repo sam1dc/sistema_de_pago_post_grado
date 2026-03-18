@@ -71,7 +71,9 @@ ipcMain.handle('get-sheet-names', async (event, { directory, fileName }) => {
 
 ipcMain.handle('add-payment', async (event, { directory, fileName, paymentData, sheetName }) => {
   try {
-    return excelWriter.addPayment(directory, fileName, paymentData, sheetName);
+    const result = excelWriter.addPayment(directory, fileName, paymentData, sheetName);
+    excelReader.invalidateCache();
+    return result;
   } catch (error) {
     throw new Error(`Error al agregar pago: ${error.message}`);
   }
@@ -103,7 +105,9 @@ ipcMain.handle('get-last-file-and-sheet', async (event, { directory, cedula }) =
 
 ipcMain.handle('delete-payment', async (event, { directory, fileName, sheetName, rowIndex }) => {
   try {
-    return excelWriter.deletePayment(directory, fileName, sheetName, rowIndex);
+    const result = excelWriter.deletePayment(directory, fileName, sheetName, rowIndex);
+    excelReader.invalidateCache();
+    return result;
   } catch (error) {
     throw new Error(`Error al eliminar pago: ${error.message}`);
   }
@@ -111,7 +115,9 @@ ipcMain.handle('delete-payment', async (event, { directory, fileName, sheetName,
 
 ipcMain.handle('update-payment', async (event, { directory, fileName, sheetName, rowIndex, paymentData }) => {
   try {
-    return excelWriter.updatePayment(directory, fileName, sheetName, rowIndex, paymentData);
+    const result = excelWriter.updatePayment(directory, fileName, sheetName, rowIndex, paymentData);
+    excelReader.invalidateCache();
+    return result;
   } catch (error) {
     throw new Error(`Error al actualizar pago: ${error.message}`);
   }

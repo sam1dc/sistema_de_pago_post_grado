@@ -1,4 +1,54 @@
 // Módulo de búsqueda de estudiantes
+
+let _pageSize = 50;
+let _currentPayments = [];
+let _currentPage = 0;
+
+function renderTable(payments, page, resultsDiv) {
+  const total = payments.length;
+  const totalPages = Math.ceil(total / _pageSize);
+  const start = page * _pageSize;
+  const slice = payments.slice(start, start + _pageSize);
+
+  const perPageSelect = `
+    <div class="select is-small">
+      <select id="perPageSelect">
+        ${[10, 25, 50, 100].map(n => `<option value="${n}" ${n === _pageSize ? 'selected' : ''}>${n} por página</option>`).join('')}
+      </select>
+    </div>`;
+
+  const paginationHtml = `
+    <div class="level mt-3">
+      <div class="level-left">
+        <span class="level-item has-text-grey">Mostrando ${total === 0 ? 0 : start + 1}–${Math.min(start + _pageSize, total)} de ${total} registros</span>
+        <span class="level-item">${perPageSelect}</span>
+      </div>
+      ${totalPages > 1 ? `
+      <div class="level-right">
+        <div class="level-item buttons">
+          <button class="button is-small" id="btnPrevPage" ${page === 0 ? 'disabled' : ''}>
+            <span class="icon"><i class="mdi mdi-chevron-left"></i></span>
+          </button>
+          <span class="button is-small is-static">${page + 1} / ${totalPages}</span>
+          <button class="button is-small" id="btnNextPage" ${page >= totalPages - 1 ? 'disabled' : ''}>
+            <span class="icon"><i class="mdi mdi-chevron-right"></i></span>
+          </button>
+        </div>
+      </div>` : ''}
+    </div>`;
+
+  return { slice, paginationHtml };
+}
+
+function attachPaginationEvents(resultsDiv, renderFn) {
+  const prev = resultsDiv.querySelector('#btnPrevPage');
+  const next = resultsDiv.querySelector('#btnNextPage');
+  const perPage = resultsDiv.querySelector('#perPageSelect');
+  if (prev) prev.addEventListener('click', () => { _currentPage--; renderFn(); });
+  if (next) next.addEventListener('click', () => { _currentPage++; renderFn(); });
+  if (perPage) perPage.addEventListener('change', (e) => { _pageSize = parseInt(e.target.value); _currentPage = 0; renderFn(); });
+}
+
 export async function searchStudent(selectedDirectory) {
   const cedula = document.getElementById('cedula').value.trim();
   const maestriaFilter = document.getElementById('searchMaestriaFilter').value;
@@ -96,70 +146,62 @@ async function searchByFilters(selectedDirectory, maestriaFilter, trimestreFilte
   }
   
   const uniqueStudents = [...new Set(allPayments.map(p => p.cedula))].length;
-  
-  const html = `
-    <div class="box mt-5">
-      <h2 class="title is-5 mb-4">Resultados de Búsqueda</h2>
-      <div class="columns">
-        <div class="column">
-          <p><strong>Total de estudiantes:</strong> ${uniqueStudents}</p>
+
+  _currentPayments = allPayments;
+  _currentPage = 0;
+
+  function render() {
+    const { slice, paginationHtml } = renderTable(_currentPayments, _currentPage, resultsDiv);
+
+    const html = `
+      <div class="box mt-5">
+        <h2 class="title is-5 mb-4">Resultados de Búsqueda</h2>
+        <div class="columns">
+          <div class="column"><p><strong>Total de estudiantes:</strong> ${uniqueStudents}</p></div>
+          <div class="column"><p><strong>Total de pagos:</strong> ${allPayments.length}</p></div>
         </div>
-        <div class="column">
-          <p><strong>Total de pagos:</strong> ${allPayments.length}</p>
-        </div>
+        ${paginationHtml}
       </div>
-    </div>
-    
-    <div class="table-container">
-      <table class="table is-fullwidth is-hoverable is-striped">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Cédula</th>
-            <th>Fecha</th>
-            <th>Trimestre</th>
-            <th>Maestría</th>
-            <th>Asignatura</th>
-            <th>U.C</th>
-            <th>Costo U.C</th>
-            <th>Total a Pagar</th>
-            <th>Abono</th>
-            <th>Resta</th>
-            <th>Observación</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${allPayments.map(p => `
+      <div class="table-container">
+        <table class="table is-fullwidth is-hoverable is-striped">
+          <thead>
             <tr>
-              <td>${p.nombre_completo}</td>
-              <td>${p.cedula}</td>
-              <td>${p.fecha || 'N/A'}</td>
-              <td><span class="tag is-info is-light">${p.trimestre}</span></td>
-              <td><span class="tag is-link is-light">${p._sheet || 'N/A'}</span></td>
-              <td>${p.asignatura || 'N/A'}</td>
-              <td>${p.uc || ''}</td>
-              <td>$${(parseFloat(p.costo_uc) || 0).toFixed(2)}</td>
-              <td><strong>$${(parseFloat(p.total_a_pagar) || 0).toFixed(2)}</strong></td>
-              <td><span class="tag is-success">$${(parseFloat(p.abono) || 0).toFixed(2)}</span></td>
-              <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(parseFloat(p.resta) || 0).toFixed(2)}</span></td>
-              <td>${p.observacion || ''}</td>
-              <td>
-                <button class="button is-small is-info btnVerDetalles" data-cedula="${p.cedula}">
-                  <span class="icon is-small">
-                    <i class="mdi mdi-eye"></i>
-                  </span>
-                  <span>Ver</span>
-                </button>
-              </td>
+              <th>Nombre</th><th>Cédula</th><th>Fecha</th><th>Trimestre</th><th>Maestría</th>
+              <th>Asignatura</th><th>U.C</th><th>Costo U.C</th><th>Total a Pagar</th>
+              <th>Abono</th><th>Resta</th><th>Observación</th><th>Acción</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-  
-  resultsDiv.innerHTML = html;
+          </thead>
+          <tbody>
+            ${slice.map(p => `
+              <tr>
+                <td>${p.nombre_completo}</td>
+                <td>${p.cedula}</td>
+                <td>${p.fecha || 'N/A'}</td>
+                <td><span class="tag is-info is-light">${p.trimestre}</span></td>
+                <td><span class="tag is-link is-light">${p._sheet || 'N/A'}</span></td>
+                <td>${p.asignatura || 'N/A'}</td>
+                <td>${p.uc || ''}</td>
+                <td>$${(parseFloat(p.costo_uc) || 0).toFixed(2)}</td>
+                <td><strong>$${(parseFloat(p.total_a_pagar) || 0).toFixed(2)}</strong></td>
+                <td><span class="tag is-success">$${(parseFloat(p.abono) || 0).toFixed(2)}</span></td>
+                <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(parseFloat(p.resta) || 0).toFixed(2)}</span></td>
+                <td>${p.observacion || ''}</td>
+                <td>
+                  <button class="button is-small is-info btnVerDetalles" data-cedula="${p.cedula}">
+                    <span class="icon is-small"><i class="mdi mdi-eye"></i></span>
+                    <span>Ver</span>
+                  </button>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+    resultsDiv.innerHTML = html;
+    attachPaginationEvents(resultsDiv, render);
+  }
+
+  render();
 }
 
 async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDiv) {
