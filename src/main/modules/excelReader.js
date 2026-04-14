@@ -50,8 +50,13 @@ function readExcelFiles(directory) {
       
       if (rawData.length < 4) continue; // Hoja vacía
       
-      const titulo = rawData[0][2] || rawData[0][0] || '';
-      const trimestre = titulo.match(/\d{4}-\d+/)?.[0] || '';
+      // Buscar el trimestre en cualquier celda de la fila 0, luego en el nombre del archivo
+      const tituloRow = rawData[0] || [];
+      const tituloCell = tituloRow.find(c => c && String(c).match(/\d{4}[-\/]\w+/i));
+      const trimestreMatch = tituloCell
+        ? String(tituloCell).match(/(\d{4})[-\/](\w+)/)
+        : String(file).match(/(\d{4})[-\/](\w+)/);
+      const trimestre = trimestreMatch ? `${trimestreMatch[1]}-${trimestreMatch[2]}` : '';
       
       // Procesar datos desde fila 3
       for (let i = 3; i < rawData.length; i++) {

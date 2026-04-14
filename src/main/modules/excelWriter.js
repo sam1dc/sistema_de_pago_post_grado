@@ -69,7 +69,9 @@ function addPayment(directory, fileName, paymentData, sheetName = null) {
       'ESP. INSTRUMENTACIÓN ',
       'ESP. EN  TELECOMUNICACIONES',
       'ESP. EN ELECTROMEDICINA',
-      'ESP. SOLDADURA'
+      'ESP. SOLDADURA',
+      'ESP. REDUCCIÓN DIRECTA',
+      'ESP. INFORMACIÓN'
     ];
     
     workbook = XLSX.utils.book_new();
