@@ -167,8 +167,20 @@ input:disabled {
   max-width: 500px;
   width: 90%;
   margin: 0 auto;
-  margin-left: calc(50% + 130px);
-  transform: translateX(-50%);
+}
+
+/* Modal OCR Responsive */
+#ocrModal .modal-card {
+  max-width: 600px;
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* Modales en desktop con sidebar visible */
+@media (min-width: 769px) {
+  .modal {
+    padding-left: 260px;
+  }
 }
 
 .hamburger-btn {
@@ -311,7 +323,6 @@ input:disabled {
 
   #initialModal .modal-card {
     max-width: 95%;
-    margin-left: 50%;
   }
 
   #initialModal .modal-card-body {
@@ -321,5 +332,17 @@ input:disabled {
   #initialModal .modal-card-head,
   #initialModal .modal-card-foot {
     padding: 1rem;
+  }
+
+  #ocrModal .modal-card {
+    max-width: 95%;
+  }
+
+  #ocrModal .modal-card-body {
+    padding: 1rem;
+  }
+
+  .modal {
+    padding-left: 0;
   }
 }
