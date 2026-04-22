@@ -14,13 +14,22 @@ body {
 }
 
 .sidebar {
-  width: 260px;
+  width: 60px;
   background: white;
   border-right: 1px solid #e8e8e8;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease;
+  transition: width 0.25s ease;
   z-index: 100;
+  overflow: hidden;
+}
+
+.sidebar:hover {
+  width: 260px;
+}
+
+.sidebar:hover ~ .main-content .modal {
+  padding-left: 260px;
 }
 
 .sidebar-overlay {
@@ -39,14 +48,33 @@ body {
 }
 
 .sidebar-header {
-  padding: 1.5rem;
+  padding: 1.5rem 0;
   border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sidebar:hover .sidebar-header {
+  padding: 1.5rem;
+  justify-content: flex-start;
 }
 
 .app-logo {
   font-size: 1.5rem;
   font-weight: 700;
   color: #363636;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-logo span {
+  display: none;
+}
+
+.sidebar:hover .app-logo span {
+  display: inline;
 }
 
 .app-logo-accent {
@@ -55,18 +83,37 @@ body {
 
 .sidebar-menu {
   flex: 1;
+  padding: 1rem 0;
+}
+
+.sidebar:hover .sidebar-menu {
   padding: 1rem;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0;
+  justify-content: center;
   border-radius: 6px;
   color: #4a4a4a;
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
+}
+
+.sidebar:hover .menu-item {
+  padding: 0.75rem 1rem;
+  justify-content: flex-start;
+}
+
+.menu-item span:last-child {
+  display: none;
+}
+
+.sidebar:hover .menu-item span:last-child {
+  display: inline;
 }
 
 .menu-item:hover {
@@ -80,8 +127,13 @@ body {
 }
 
 .menu-item .mdi {
-  margin-right: 0.75rem;
+  margin-right: 0;
   font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.sidebar:hover .menu-item .mdi {
+  margin-right: 0.75rem;
 }
 
 .main-content {
@@ -179,7 +231,7 @@ input:disabled {
 /* Modales en desktop con sidebar visible */
 @media (min-width: 769px) {
   .modal {
-    padding-left: 260px;
+    padding-left: 60px;
   }
 }
 
