@@ -19,7 +19,7 @@ export async function addPayment(selectedDirectory) {
   const resultsDiv = document.getElementById('addResults');
 
   if (!selectedDirectory) {
-    resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
+    showToast('Por favor, seleccione un directorio primero.', 'is-danger');
     return;
   }
 
@@ -29,26 +29,26 @@ export async function addPayment(selectedDirectory) {
   if (createNew) {
     const trimestre = document.getElementById('newFileName').value.trim();
     if (!trimestre) {
-      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese el trimestre (Ej: 2026-1).</div>';
+      showToast('Por favor, ingrese el trimestre (Ej: 2026-1).', 'is-danger');
       return;
     }
     fileName = `CONTROL DE PAGOS DEL TRIMESTRE ${trimestre}.xlsx`;
     
     sheetName = document.getElementById("newFileMaestriaSelect").value;
     if (!sheetName) {
-      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione una maestría.</div>';
+      showToast('Por favor, seleccione una maestría.', 'is-danger');
       return;
     }
   } else {
     fileName = document.getElementById('fileSelect').value;
     if (!fileName) {
-      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un archivo.</div>';
+      showToast('Por favor, seleccione un archivo.', 'is-danger');
       return;
     }
     
     sheetName = document.getElementById('sheetSelect').value;
     if (!sheetName) {
-      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione una maestría (hoja).</div>';
+      showToast('Por favor, seleccione una maestría (hoja).', 'is-danger');
       return;
     }
   }
@@ -102,13 +102,14 @@ export async function addPayment(selectedDirectory) {
   };
 
   if (!paymentData.cedula || !paymentData.nombre_completo || !paymentData.fecha) {
-    resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, complete los campos obligatorios (Cédula, Nombre Completo, Fecha).</div>';
+    showToast('Por favor, complete los campos obligatorios (Cédula, Nombre Completo, Fecha).', 'is-danger');
     return;
   }
 
   try {
     await window.electronAPI.addPayment(selectedDirectory, fileName, paymentData, sheetName);
-    resultsDiv.innerHTML = '<div class="notification is-success"><button class="delete"></button>¡Pago agregado exitosamente!</div>';
+    showToast('¡Pago agregado exitosamente!', 'is-success');
+    resultsDiv.innerHTML = '';
     
     document.getElementById('studentForm').style.display = 'none';
     document.getElementById('searchCedula').value = '';
@@ -131,14 +132,11 @@ export async function addPayment(selectedDirectory) {
       }
     }, 500);
     
-    setTimeout(() => {
-      resultsDiv.innerHTML = '';
-    }, 3000);
   } catch (error) {
     if (error.message.includes('EBUSY') || error.message.includes('locked')) {
-      resultsDiv.innerHTML = '<div class="notification is-danger"><button class="delete"></button>⚠️ El archivo Excel está abierto. Por favor, cierra Microsoft Excel e intenta de nuevo.</div>';
+      showToast('⚠️ El archivo Excel está abierto. Por favor, cierra Microsoft Excel e intenta de nuevo.', 'is-danger');
     } else {
-      resultsDiv.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
+      showToast(error.message, 'is-danger');
     }
   }
 }
@@ -184,12 +182,12 @@ export async function searchStudentForAdd(selectedDirectory) {
   if (ocrButtonContainer) ocrButtonContainer.style.display = 'none';
 
   if (!selectedDirectory) {
-    addResults.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
+    showToast('Por favor, seleccione un directorio primero.', 'is-danger');
     return;
   }
 
   if (!cedula) {
-    addResults.innerHTML = '<div class="notification is-danger"><button class="delete"></button>Por favor, ingrese una cédula.</div>';
+    showToast('Por favor, ingrese una cédula.', 'is-danger');
     return;
   }
 
@@ -231,7 +229,7 @@ export async function searchStudentForAdd(selectedDirectory) {
       document.getElementById('addCedula').value = cedula;
       if (ocrButtonContainer) ocrButtonContainer.style.display = 'block';    }
   } catch (error) {
-    addResults.innerHTML = `<div class="notification is-danger"><button class="delete"></button>${error.message}</div>`;
+    showToast(error.message, 'is-danger');
   }
 }
 

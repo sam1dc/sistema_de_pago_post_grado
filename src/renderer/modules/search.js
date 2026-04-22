@@ -1,3 +1,18 @@
+function showToast(message, type = 'is-info') {
+  if (window.bulmaToast) {
+    window.bulmaToast.toast({
+      message,
+      type,
+      dismissible: false,
+      pauseOnHover: true,
+      duration: 3000,
+      position: 'top-center',
+      closeOnClick: true,
+      opacity: 1,
+      single: false
+    });
+  }
+}
 // Módulo de búsqueda de estudiantes
 
 let _pageSize = 50;
@@ -58,12 +73,12 @@ export async function searchStudent(selectedDirectory) {
   const resultsDiv = document.getElementById('results');
 
   if (!selectedDirectory) {
-    resultsDiv.innerHTML = '<div class="notification is-danger mt-4"><button class="delete"></button>Por favor, seleccione un directorio primero.</div>';
+    showToast('Por favor, seleccione un directorio primero.', 'is-danger'); return;
     return;
   }
 
   if (!cedula && !maestriaFilter && !trimestreFilter && !fechaDesde && !fechaHasta) {
-    resultsDiv.innerHTML = '<div class="notification is-danger mt-4"><button class="delete"></button>Por favor, ingrese una cédula o seleccione al menos un filtro.</div>';
+    showToast('Por favor, ingrese una cédula o seleccione al menos un filtro.', 'is-danger'); return;
     return;
   }
 
@@ -77,7 +92,7 @@ export async function searchStudent(selectedDirectory) {
     // Búsqueda por cédula (con o sin filtros)
     await searchByCedula(selectedDirectory, cedula, maestriaFilter, trimestreFilter, fechaDesde, fechaHasta, resultsDiv);
   } catch (error) {
-    resultsDiv.innerHTML = `<div class="notification is-danger mt-4"><button class="delete"></button>${error.message}</div>`;
+    showToast(error.message, 'is-danger');
   }
 }
 
@@ -99,7 +114,7 @@ async function searchByFilters(selectedDirectory, maestriaFilter, trimestreFilte
   }
   
   if (!students || students.length === 0) {
-    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros.</div>';
+    showToast('No se encontraron registros.', 'is-warning');
     return;
   }
   
@@ -141,7 +156,7 @@ async function searchByFilters(selectedDirectory, maestriaFilter, trimestreFilte
   }
   
   if (allPayments.length === 0) {
-    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros con los filtros seleccionados.</div>';
+    showToast('No se encontraron registros con los filtros seleccionados.', 'is-warning');
     return;
   }
   
@@ -208,7 +223,7 @@ async function searchByMaestriaOnly(selectedDirectory, maestriaFilter, resultsDi
   const students = await window.electronAPI.searchByMaestria(selectedDirectory, maestriaFilter);
   
   if (!students || students.length === 0) {
-    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros en esta maestría.</div>';
+    showToast('No se encontraron registros en esta maestría.', 'is-warning');
     return;
   }
   
@@ -281,7 +296,7 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
   const data = await window.electronAPI.searchStudent(selectedDirectory, cedula);
 
   if (!data) {
-    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros para esta cédula.</div>';
+    showToast('No se encontraron registros para esta cédula.', 'is-warning');
     return;
   }
 
@@ -316,7 +331,7 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
   }
   
   if (payments.length === 0) {
-    resultsDiv.innerHTML = '<div class="notification is-warning mt-4"><button class="delete"></button>No se encontraron registros para esta cédula con los filtros seleccionados.</div>';
+    showToast('No se encontraron registros para esta cédula con los filtros seleccionados.', 'is-warning');
     return;
   }
   
