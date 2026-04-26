@@ -297,6 +297,8 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
 
   if (!data) {
     showToast('No se encontraron registros para esta cédula.', 'is-warning');
+    document.getElementById('cedula').value = '';
+    resultsDiv.innerHTML = '';
     return;
   }
 
@@ -404,21 +406,14 @@ async function searchByCedula(selectedDirectory, cedula, maestriaFilter, trimest
               <td><span class="tag ${p.resta > 0 ? 'is-warning' : 'is-success'}">$${(parseFloat(p.resta) || 0).toFixed(2)}</span></td>
               <td>${p.observacion || ''}</td>
               <td>
-                <div class="buttons are-small has-addons">
-                  <button class="button is-info btnEditPayment" 
-                    data-file="${p._file}" 
-                    data-sheet="${p._sheet}" 
-                    data-row="${p._rowIndex}"
-                    data-payment='${JSON.stringify(p)}'>
-                    <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                  </button>
-                  <button class="button is-danger btnDeletePayment" 
-                    data-file="${p._file}" 
-                    data-sheet="${p._sheet}" 
-                    data-row="${p._rowIndex}">
-                    <span class="icon"><i class="mdi mdi-delete"></i></span>
-                  </button>
-                </div>
+                <button class="button is-small is-danger btnDeletePayment" 
+                  data-file="${p._file}" 
+                  data-sheet="${p._sheet}" 
+                  data-row="${p._rowIndex}"
+                  data-cedula="${p.cedula}"
+                  data-fecha="${p.fecha}">
+                  <span class="icon"><i class="mdi mdi-delete"></i></span>
+                </button>
               </td>
             </tr>
           `).join('')}

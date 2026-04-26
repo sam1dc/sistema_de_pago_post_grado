@@ -18,7 +18,7 @@ function appendRowToSheet(worksheet, rowData) {
 // Elimina una fila del worksheet desplazando las siguientes hacia arriba (preserva estilos de otras filas)
 function deleteRowFromSheet(worksheet, rowIdx) {
   const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
-  // Desplazar filas hacia arriba
+  // Desplazar filas hacia arriba desde rowIdx
   for (let r = rowIdx; r < range.e.r; r++) {
     for (let c = range.s.c; c <= range.e.c; c++) {
       const from = XLSX.utils.encode_cell({ r: r + 1, c });
@@ -30,11 +30,18 @@ function deleteRowFromSheet(worksheet, rowIdx) {
       }
     }
   }
-  // Limpiar última fila
+  // Limpiar la última fila (siempre, incluso si rowIdx === range.e.r)
   for (let c = range.s.c; c <= range.e.c; c++) {
     delete worksheet[XLSX.utils.encode_cell({ r: range.e.r, c })];
   }
-  range.e.r -= 1;
+  // Recalcular el rango real ignorando filas vacías al final
+  let lastDataRow = range.s.r;
+  for (let r = range.s.r; r <= range.e.r - 1; r++) {
+    for (let c = range.s.c; c <= range.e.c; c++) {
+      if (worksheet[XLSX.utils.encode_cell({ r, c })]) { lastDataRow = r; }
+    }
+  }
+  range.e.r = lastDataRow;
   worksheet['!ref'] = XLSX.utils.encode_range(range);
 }
 
@@ -171,7 +178,7 @@ function createNewExcelFile(directory, fileName) {
   return fileName;
 }
 
-function deletePayment(directory, fileName, sheetName, rowIndex) {
+function deletePayment(directory, fileName, sheetName, rowIndex, cedula, fecha) {
   const filePath = path.join(directory, fileName);
   
   if (!fs.existsSync(filePath)) {
@@ -180,20 +187,62 @@ function deletePayment(directory, fileName, sheetName, rowIndex) {
   
   const workbook = XLSX.readFile(filePath);
   
+  // Resolver nombre de hoja (puede tener espacios al final)
+  let resolvedSheet = sheetName;
   if (!workbook.Sheets[sheetName]) {
-    throw new Error('Hoja no encontrada');
+    const found = Object.keys(workbook.Sheets).find(n => n.trim() === sheetName.trim());
+    if (!found) throw new Error('Hoja no encontrada');
+    resolvedSheet = found;
   }
   
-  const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+  const ws = workbook.Sheets[resolvedSheet];
+  const wsRange = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+  const rawData = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
   
-  // Eliminar la fila (rowIndex es el índice en el array rawData)
   if (rowIndex < 0 || rowIndex >= rawData.length) {
     throw new Error('Índice de fila inválido');
   }
+
+  // Verificar que la fila corresponde al pago correcto usando cédula
+  const normalize = v => String(v || '').replace(/\./g, '').trim();
+  const rowCedula = normalize(rawData[rowIndex][3]);
+  const expectedCedula = normalize(cedula);
+
+  // rowIndex es índice en rawData; convertir a índice real del worksheet
+  let targetRow = wsRange.s.r + rowIndex;
+  console.log('[deletePayment] rowIndex:', rowIndex, '| rowCedula:', JSON.stringify(rowCedula), '| expectedCedula:', JSON.stringify(expectedCedula), '| match:', rowCedula === expectedCedula);
+
+  if (expectedCedula && normalize(rawData[rowIndex][3]) !== expectedCedula) {
+    // El índice no coincide: buscar la fila correcta por cédula + fecha
+    const fechaNorm = String(fecha || '').trim();
+    let found = -1;
+    let foundByCedulaOnly = -1;
+    for (let i = 3; i < rawData.length; i++) {
+      if (normalize(rawData[i][3]) === expectedCedula) {
+        if (foundByCedulaOnly === -1) foundByCedulaOnly = i;
+        if (!fechaNorm || String(rawData[i][9] || '').includes(fechaNorm) || fechaNorm.includes(String(rawData[i][9] || ''))) {
+          found = i;
+          break;
+        }
+      }
+    }
+    if (found === -1) found = foundByCedulaOnly;
+    if (found === -1) {
+      throw new Error(
+        `DATOS_INVALIDOS: No se encontró la fila a eliminar. La cédula "${cedula}" en este registro puede estar mal escrita o tener un formato incorrecto en el Excel. Por favor, corrija o elimine manualmente la fila en el archivo Excel.`
+      );
+    }
+    targetRow = wsRange.s.r + found; // convertir a índice del worksheet
+  }
   
-  deleteRowFromSheet(workbook.Sheets[sheetName], rowIndex);
+  console.log('[deletePayment] Eliminando fila ws:', targetRow, '(rawIndex:', rowIndex, ') de hoja', resolvedSheet);
+  deleteRowFromSheet(ws, targetRow);
   XLSX.writeFile(workbook, filePath);
-  
+  // Forzar flush a disco en Windows
+  const fd = fs.openSync(filePath, 'r+');
+  fs.fsyncSync(fd);
+  fs.closeSync(fd);
+  console.log('[deletePayment] Archivo guardado y flushed OK');
   return true;
 }
 

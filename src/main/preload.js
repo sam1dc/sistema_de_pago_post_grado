@@ -10,6 +10,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createNewFile: (directory, fileName) => ipcRenderer.invoke('create-new-file', { directory, fileName }),
   getLastDebtInSheet: (directory, fileName, sheetName, cedula) => ipcRenderer.invoke('get-last-debt-in-sheet', { directory, fileName, sheetName, cedula }),
   getLastFileAndSheet: (directory, cedula) => ipcRenderer.invoke('get-last-file-and-sheet', { directory, cedula }),
-  deletePayment: (directory, fileName, sheetName, rowIndex) => ipcRenderer.invoke('delete-payment', { directory, fileName, sheetName, rowIndex }),
+  deletePayment: (directory, fileName, sheetName, rowIndex, cedula, fecha) => ipcRenderer.invoke('delete-payment', { directory, fileName, sheetName, rowIndex, cedula, fecha }),
   updatePayment: (directory, fileName, sheetName, rowIndex, paymentData) => ipcRenderer.invoke('update-payment', { directory, fileName, sheetName, rowIndex, paymentData })
 });

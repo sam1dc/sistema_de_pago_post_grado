@@ -6,7 +6,11 @@ const XLSX = require('xlsx');
 let _cache = { directory: null, records: null };
 
 function readExcelFilesCached(directory) {
-  if (_cache.directory === directory && _cache.records) return _cache.records;
+  if (_cache.directory === directory && _cache.records) {
+    console.log('[cache] HIT');
+    return _cache.records;
+  }
+  console.log('[cache] MISS - releyendo archivos');
   const records = readExcelFiles(directory);
   _cache = { directory, records };
   return records;

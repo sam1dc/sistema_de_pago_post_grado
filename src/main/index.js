@@ -103,9 +103,9 @@ ipcMain.handle('get-last-file-and-sheet', async (event, { directory, cedula }) =
   }
 });
 
-ipcMain.handle('delete-payment', async (event, { directory, fileName, sheetName, rowIndex }) => {
+ipcMain.handle('delete-payment', async (event, { directory, fileName, sheetName, rowIndex, cedula, fecha }) => {
   try {
-    const result = excelWriter.deletePayment(directory, fileName, sheetName, rowIndex);
+    const result = excelWriter.deletePayment(directory, fileName, sheetName, rowIndex, cedula, fecha);
     excelReader.invalidateCache();
     return result;
   } catch (error) {
